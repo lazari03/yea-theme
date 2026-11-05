@@ -1,0 +1,78 @@
+/* Editable Gutenberg logo wall. Partners remain content, never theme data. */
+.logo-wall-grid {
+  --partner-column-min: 18rem;
+  --partner-logo-size: clamp(9rem, 15vw, 12rem);
+  --partner-card-height: 12rem;
+  --partner-gap: clamp(1rem, 2vw, 1.5rem);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--partner-column-min)), 1fr));
+  gap: var(--partner-gap);
+  align-items: stretch;
+}
+.logo-wall-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 0;
+  min-block-size: var(--partner-card-height, 12rem);
+  gap: 1rem;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: var(--card);
+  box-shadow: none;
+}
+.logo-wall-card:hover { transform: none; box-shadow: none; }
+.logo-wall-card .wp-block-image,
+.logo-wall-card .wp-block-image a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  inline-size: 100%;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+  margin: 0;
+}
+/* Saved Image blocks can have inline dimensions and a square crop. Override
+   those only inside this component; never crop or distort a partner's mark. */
+.logo-wall-card img {
+  display: block;
+  width: min(100%, var(--partner-logo-size, 12rem)) !important;
+  height: auto !important;
+  max-width: 100%;
+  max-height: none;
+  aspect-ratio: auto !important;
+  object-fit: contain !important;
+  border-radius: 0;
+  box-shadow: none;
+}
+.logo-wall-card p,
+.logo-wall-card figcaption {
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+/* The window is based on visible pixel bounds, not a partner-name lookup.
+   It hides empty source-canvas margins while preserving every mark's ratio. */
+.logo-wall-card .yea-partner-logo-canvas {
+  display: block;
+  position: relative;
+  width: min(100%, 17rem, calc(7rem * var(--logo-ratio)));
+  aspect-ratio: var(--logo-ratio);
+  overflow: hidden;
+}
+.logo-wall-card .yea-partner-logo-canvas img {
+  position: absolute;
+  width: var(--logo-image-width) !important;
+  max-width: none;
+  height: auto !important;
+  left: var(--logo-offset-x);
+  top: var(--logo-offset-y);
+}
+.logo-wall-card img { margin: 0; }

@@ -35,37 +35,34 @@ async function boot(options = {}) {
   return {dom, w, d:w.document, errors, close:()=>dom.window.close()};
 }
 for (const legacy of [false,true]) {
-  test(`${legacy ? 'PHP' : 'block'} navigation: parent links, submenu, focus, resize and cleanup`, async () => {
-    const ctx = await boot({legacy}); const {w,d}=ctx;
+  test(`${legacy ? 'PHP' : 'block'} menu: all pages visible, real links, focus and resize`, async () => {
+    const ctx=await boot({legacy});const {w,d}=ctx;
     try {
       const trigger=d.querySelector(legacy ? '#menu-toggle' : '.wp-block-navigation__responsive-container-open');
       assert(d.querySelector('#header').classList.contains('yea-nav-ready'));
-      trigger.focus(); trigger.click();
-      const drawer=d.querySelector('.yea-mobile-drawer');
-      assert.equal(drawer.hidden,false); assert.equal(d.activeElement.className,'yea-menu-close');
+      trigger.focus();trigger.click();const drawer=d.querySelector('.yea-mobile-drawer');
+      assert.equal(drawer.hidden,false);assert.equal(d.activeElement.className,'yea-menu-close');
       assert.equal(d.querySelector('main').inert,true);
-      const toggle=drawer.querySelector('.wp-block-navigation-submenu__toggle');
-      toggle.click(); assert.equal(toggle.getAttribute('aria-expanded'),'true');
-      const submenu=d.getElementById(toggle.getAttribute('aria-controls'));assert.equal(submenu.hidden,false);
-      const before=submenu; toggle.focus(); w.innerWidth=768;w.dispatchEvent(new w.Event('resize'));
-      assert.equal(d.getElementById(submenu.id),before);assert.equal(d.activeElement,toggle);
-      assert.equal(toggle.getAttribute('aria-expanded'),'true');
+      assert.equal(drawer.querySelectorAll('.wp-block-navigation-submenu__toggle').length,0);
+      assert.equal(drawer.querySelectorAll('ul[hidden]').length,0);
+      assert.equal(drawer.querySelector('.header-actions--mobile'),null,'never copy signup CTAs');
+      const submenu=drawer.querySelector('ul ul');const before=submenu;
+      const childLink=drawer.querySelector('a[href="/afterschool/"]');childLink.focus();
+      w.innerWidth=768;w.dispatchEvent(new w.Event('resize'));
+      assert.equal(drawer.querySelector('ul ul'),before);assert.equal(d.activeElement,childLink);
       const closeButton=drawer.querySelector('.yea-menu-close');closeButton.focus();
       d.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Tab',shiftKey:true,bubbles:true,cancelable:true}));
-      assert.equal(d.activeElement,drawer.querySelector('.header-actions--mobile a'));
+      assert.equal(d.activeElement,Array.from(drawer.querySelectorAll('a[href]')).at(-1));
       d.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true}));
       assert.equal(drawer.hidden,true);assert.equal(d.activeElement,trigger);assert.equal(d.querySelector('main').inert,undefined);
       assert(!d.body.classList.contains('has-modal-open'));
       trigger.click();let navigable=false;
       w.addEventListener('click',event=>{if(event.target.closest('a')) {navigable=!event.defaultPrevented;event.preventDefault();}},{once:true});
-      drawer.querySelector('a[href="/programs/"]').click();
-      assert(navigable,'parent link default must not be intercepted');assert.equal(drawer.hidden,true);
-      trigger.click();w.innerWidth=1280;w.dispatchEvent(new w.Event('resize'));
-      assert.equal(drawer.hidden,true);assert(!d.body.classList.contains('has-modal-open'));
-      if (!legacy) {const native=d.querySelector('.wp-block-navigation__responsive-container');assert(!native.hidden);assert.notEqual(native.getAttribute('aria-hidden'),'true');}
-      const ids=Array.from(d.querySelectorAll('[id]'),el=>el.id);assert.equal(new Set(ids).size,ids.length);
-      assert.equal(ctx.errors.length,0);
-    } finally {ctx.close();}
+      drawer.querySelector('a[href="/programs/"]').click();assert(navigable,'page links must navigate');assert.equal(drawer.hidden,true);
+      trigger.click();w.innerWidth=1280;w.dispatchEvent(new w.Event('resize'));assert.equal(drawer.hidden,true);
+      if(!legacy){const native=d.querySelector('.wp-block-navigation__responsive-container');assert(!native.hidden);assert.notEqual(native.getAttribute('aria-hidden'),'true');}
+      const ids=Array.from(d.querySelectorAll('[id]'),el=>el.id);assert.equal(new Set(ids).size,ids.length);assert.equal(ctx.errors.length,0);
+    }finally{ctx.close();}
   });
 }
 test('WordPress wrapped page-list fallback stays visible in the drawer',async()=>{
@@ -79,7 +76,7 @@ test('reduced motion and no observer leave reveal content unhidden',async()=>{
  for(const options of [{reduced:true,observer:true},{}]) {const ctx=await boot(options);try{assert(!ctx.d.querySelector('.reveal').classList.contains('reveal-pending'));ctx.d.querySelector('a[href="#%E0%A4%A"]').click();assert.equal(ctx.errors.length,0);}finally{ctx.close();}}
 });
 test('CSS parses, reveal hiding is opt-in, brand fonts exist',()=>{
- const errors=[];csstree.parse(css,{onParseError:error=>errors.push(error.message)});assert.deepEqual(errors,[]);
+ const errors=[];for(const source of [css,fs.readFileSync(path.join(root,'assets/css/components/partner-logos.css'),'utf8'),...['navigation','content','forms'].map(name=>fs.readFileSync(path.join(root,`assets/css/components/${name}.css`),'utf8'))])csstree.parse(source,{onParseError:error=>errors.push(error.message)});assert.deepEqual(errors,[]);
  assert(!/\.reveal\s*\{\s*opacity:\s*0/.test(css));
  const theme=JSON.parse(fs.readFileSync(path.join(root,'theme.json'),'utf8'));
  assert(theme.settings.typography.fontFamilies.some(f=>f.slug==='montserrat'));

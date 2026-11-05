@@ -30,12 +30,6 @@
 
   <!-- wp:navigation {"overlayMenu":"mobile","icon":"menu","className":"nav","layout":{"type":"flex","justifyContent":"center","orientation":"horizontal","flexWrap":"nowrap"}} /-->
 
-  <!-- wp:buttons {"metadata":{"name":"Header Actions"},"className":"header-actions","layout":{"type":"flex","justifyContent":"right","flexWrap":"nowrap"}} -->
-  <div class="wp-block-buttons header-actions">
-    <!-- wp:button -->
-    <div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="#join">Join YEA</a></div>
-    <!-- /wp:button -->
-  </div>
-  <!-- /wp:buttons -->
+
 </div>
 <!-- /wp:group -->

@@ -4380,3 +4380,8 @@ h1, h2, h3, h4, h5, h6,
 .program-card:not(a), .logo-box:not(a) { cursor: default; }
 .program-card h3 { letter-spacing: 0.01em; }
 .cta-band { background: var(--primary-dark); }
+
+/* Keep submenu controls above full-width links in cloned core navigation. */
+@media (max-width: 1024px) {
+  .yea-mobile-drawer .wp-block-navigation-submenu__toggle { z-index: 2; }
+}

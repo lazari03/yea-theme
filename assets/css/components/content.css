@@ -20,3 +20,9 @@
 @media (max-width: 600px) {
   .wp-block-table :is(th, td) { padding: 0.75rem; }
 }
+/* Native lazy-image placeholders must not dictate a grid track's minimum width. */
+.hero-grid > *,
+.community-grid > *,
+.posts-grid > * { min-inline-size: 0; }
+.mosaic { min-inline-size: 0; max-inline-size: 100%; }
+.post-card .wp-block-post-featured-image a { display: block; max-inline-size: 100%; }

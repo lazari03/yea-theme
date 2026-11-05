@@ -82,6 +82,15 @@ function yea_render_partner_logos($html, $block) {
         if (!$bounds || !$image->parentNode) {
             continue;
         }
+        // Native sizes=auto applies size containment to lazy images. Inside an
+        // optical window that makes height:auto use the 1500px placeholder
+        // instead of the source ratio. Keep the explicit responsive sizes.
+        $sizes = preg_replace('/^\s*auto\s*,?\s*/i', '', $image->getAttribute('sizes'));
+        if ($sizes) {
+            $image->setAttribute('sizes', $sizes);
+        } else {
+            $image->removeAttribute('sizes');
+        }
         $canvas = $dom->createElement('span');
         $canvas->setAttribute('class', 'yea-partner-logo-canvas');
         $canvas->setAttribute('style', sprintf(

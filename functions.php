@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define theme version
-define('YEA_VERSION', '1.3.52');
+define('YEA_VERSION', '1.3.53');
 
 require_once get_template_directory() . '/inc/partner-logos.php';
 

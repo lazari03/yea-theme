@@ -1,0 +1,55 @@
+name: Deploy YEA Theme
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: yea-theme-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Verify theme files
+        run: |
+          test -f style.css
+          test -f functions.php
+
+      - name: Check PHP syntax
+        run: find . -type f -name '*.php' -not -path './node_modules/*' -not -path './vendor/*' -print0 | xargs -0 -r -n1 php -l
+
+      - name: Deploy theme using FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          security: strict
+          local-dir: ./
+          server-dir: ./
+          dangerous-clean-slate: false
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/.env
+            **/.env.*
+            **/*.sql
+            **/*.zip
+            **/.DS_Store

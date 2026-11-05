@@ -1,6 +1,6 @@
 # Theme improvement progress
 
-Updated: 2026-11-05. Release candidate: 1.3.53. Work branch: `improve/programs-forms-and-languages` (the branch name predates clarification; no language changes are included).
+Updated: 2026-11-05. Release candidate: 1.3.54. Work branch: `improve/programs-forms-and-languages` (the branch name predates clarification; no language changes are included).
 
 ## Scope
 
@@ -43,3 +43,6 @@ Complete screenshot review, publish the tested revision, apply narrowly scoped s
 
 - Live blog first page: 10 posts; eighth/final page: 3 posts, matching 73 total.
 - Additional public HTTP fetches of several inner pages hit proxy timeouts/errors; authenticated page/content inventory remains available. Do not treat these transport failures as proof that a page should be removed.
+
+- 1.3.53 deployed successfully, but the final live check showed WordPress re-added `sizes=auto` after block rendering. 1.3.54 marks only optical logo images and reapplies the exception through WordPress's final image filter. The regression test now runs that complete content-image pipeline.
+- Production-markup home checks: all 12 widths pass after containment fixes. Article layout: four widths pass. Live CF7 registration markup: four widths pass with third-party scripts disabled for offline layout checks.

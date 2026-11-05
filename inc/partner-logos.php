@@ -91,6 +91,7 @@ function yea_render_partner_logos($html, $block) {
         } else {
             $image->removeAttribute('sizes');
         }
+        $image->setAttribute('class', trim($image->getAttribute('class') . ' yea-partner-logo-image'));
         $canvas = $dom->createElement('span');
         $canvas->setAttribute('class', 'yea-partner-logo-canvas');
         $canvas->setAttribute('style', sprintf(
@@ -114,3 +115,12 @@ function yea_render_partner_logos($html, $block) {
     return $output ?: $html;
 }
 add_filter('render_block_core/group', 'yea_render_partner_logos', 20, 2);
+
+/** Keep the logo exception after WordPress's later content-image optimization. */
+function yea_partner_logo_explicit_sizes($image) {
+    if (false === strpos($image, 'yea-partner-logo-image')) {
+        return $image;
+    }
+    return preg_replace('/(\ssizes=([\"\']))\s*auto\s*,?\s*/i', '$1', $image);
+}
+add_filter('wp_content_img_tag', 'yea_partner_logo_explicit_sizes', 99);

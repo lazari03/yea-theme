@@ -48,6 +48,7 @@ try {
         $markup = '<div><img class="wp-image-' . $attachment_id . '" src="fixture.png" sizes="auto, (max-width: 300px) 100vw, 300px" width="40" height="40" loading="lazy"></div>';
         $rendered = yea_render_partner_logos($markup, array('attrs' => array('className' => 'logo-wall-grid')));
         check_theme(strpos($rendered, 'yea-partner-logo-canvas') !== false, 'Logo wrapper missing');
+        $rendered = wp_filter_content_tags($rendered, 'the_content');
         check_theme(strpos($rendered, 'sizes="auto') === false, 'Optical logo must not use native auto-size containment');
         check_theme(strpos($rendered, '(max-width: 300px) 100vw, 300px') !== false, 'Explicit responsive sizes must survive');
         check_theme(yea_render_partner_logos($markup, array('attrs' => array('className' => 'article'))) === $markup, 'Article responsive sizes must stay unchanged');

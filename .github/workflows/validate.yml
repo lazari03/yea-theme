@@ -1,0 +1,22 @@
+name: Validate YEA Theme
+on:
+  pull_request:
+  push:
+    branches-ignore: [main]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Check PHP syntax
+        run: find . -type f -name '*.php' -not -path './node_modules/*' -print0 | xargs -0 -r -n1 php -l
+      - name: Check JavaScript, CSS, configuration and navigation
+        run: npm test

@@ -467,7 +467,7 @@
         <h2 class="wp-block-heading">Ready to join or partner with YEA?</h2>
         <!-- /wp:heading -->
         <!-- wp:paragraph -->
-        <p>One clear community-facing action. One clear donor-facing action. No clutter.</p>
+        <p>Connect with YEA to volunteer, share an idea, or build a partnership.</p>
         <!-- /wp:paragraph -->
       </div>
       <!-- /wp:group -->
@@ -475,10 +475,10 @@
       <!-- wp:buttons -->
       <div class="wp-block-buttons">
         <!-- wp:button -->
-        <div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="#">Join the Community</a></div>
+        <div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="<?php echo esc_url(home_url('/be-a-volunteer/')); ?>">Join the Community</a></div>
         <!-- /wp:button -->
         <!-- wp:button {"className":"is-style-outline"} -->
-        <div class="wp-block-button is-style-outline"><a class="wp-block-button__link wp-element-button" href="#">Partner With Us</a></div>
+        <div class="wp-block-button is-style-outline"><a class="wp-block-button__link wp-element-button" href="<?php echo esc_url(home_url('/contact-2/')); ?>">Partner With Us</a></div>
         <!-- /wp:button -->
       </div>
       <!-- /wp:buttons -->

@@ -80,6 +80,16 @@
           "slug": "inter",
           "name": "Inter",
           "fontFamily": "Inter, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif"
+        },
+        {
+          "slug": "montserrat",
+          "name": "Montserrat",
+          "fontFamily": "Montserrat, system-ui, sans-serif"
+        },
+        {
+          "slug": "bebas-neue",
+          "name": "Bebas Neue",
+          "fontFamily": "\"Bebas Neue\", Impact, sans-serif"
         }
       ],
       "fontSizes": [
@@ -121,15 +131,16 @@
       "blockGap": "1.5rem"
     },
     "typography": {
-      "fontFamily": "var:preset|font-family|inter",
+      "fontFamily": "var:preset|font-family|montserrat",
       "lineHeight": "1.5"
     },
     "elements": {
       "heading": {
         "typography": {
-          "fontWeight": "700",
-          "lineHeight": "1.1",
-          "letterSpacing": "-0.05em"
+          "fontWeight": "400",
+          "lineHeight": "1.05",
+          "letterSpacing": "0.01em",
+          "fontFamily": "var:preset|font-family|bebas-neue"
         }
       },
       "link": {

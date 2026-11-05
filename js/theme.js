@@ -12,8 +12,7 @@
         initScrollReveal();
         initCounterAnimation();
         initSmoothScroll();
-        initParallax();
-        initProgramCards();
+        // Keep page content steady: decorative tilt and parallax are disabled.
     });
 
     /**
@@ -62,6 +61,8 @@
             return;
         }
 
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
         const observerOptions = {
             threshold: 0.1,
             rootMargin: '0px 0px -50px 0px'
@@ -78,6 +79,7 @@
 
         revealElements.forEach(function(el) {
             observer.observe(el);
+            el.classList.add('reveal-pending');
         });
     }
 
@@ -115,6 +117,10 @@
             return;
         }
 
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            element.textContent = target;
+            return;
+        }
         const duration = 2000;
         const startTime = performance.now();
         const startValue = 0;
@@ -148,7 +154,9 @@
                 const href = this.getAttribute('href');
                 if (href === '#') return;
                 
-                const target = document.querySelector(href);
+                let id;
+                try { id = decodeURIComponent(href.slice(1)); } catch (error) { return; }
+                const target = document.getElementById(id);
                 if (!target) return;
                 
                 e.preventDefault();
@@ -159,7 +167,7 @@
                 
                 window.scrollTo({
                     top: offsetPosition,
-                    behavior: 'smooth'
+                    behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
                 });
             });
         });
@@ -271,12 +279,17 @@
         document.body.classList.remove('slide-open', 'offside-js--init', 'offside-js--interact');
 
         const header = document.getElementById('header');
-        const navigation = header ? header.querySelector('.header-inner > .nav.wp-block-navigation') : null;
-        const openButton = navigation ? navigation.querySelector('.wp-block-navigation__responsive-container-open') : null;
+        const navigation = header ? header.querySelector('.header-inner > .nav') : null;
+        const openButton = navigation ? (navigation.querySelector('.wp-block-navigation__responsive-container-open') || header.querySelector('#menu-toggle')) : null;
         const responsiveContainer = navigation ? navigation.querySelector('.wp-block-navigation__responsive-container') : null;
         const desktopActions = header ? header.querySelector('.header-inner > .header-actions') : null;
 
         if (!header || !navigation || !openButton) return;
+        const labels = window.yeaOptions || {};
+        let menuDirty = true;
+        let inertRegions = [];
+        let scrollLocks = [];
+        let returnFocus = null;
 
         function getMenuCandidates(root) {
             if (!root) {
@@ -284,7 +297,7 @@
             }
 
             return Array.from(
-                root.querySelectorAll('.wp-block-navigation__container, .wp-block-page-list, .wp-block-pages-list')
+                root.querySelectorAll('.wp-block-navigation__container, .wp-block-page-list, .wp-block-pages-list, #primary-menu')
             );
         }
 
@@ -309,7 +322,12 @@
             const orderedCandidates = responsiveCandidates.concat(primaryCandidates);
 
             return orderedCandidates.find(function(candidate) {
-                return getMenuLinks(candidate).length > 0;
+                // Core's page-list fallback can wrap a list inside a container.
+                // Clone the list that owns the items, not a wrapper whose only
+                // child would otherwise be mistaken for a hidden submenu.
+                return getMenuLinks(candidate).length > 0 && Array.from(candidate.children).some(function(child) {
+                    return child.tagName === 'LI';
+                });
             }) || null;
         }
 
@@ -359,6 +377,10 @@
                 drawer.className = 'yea-mobile-drawer';
                 drawer.setAttribute('hidden', 'hidden');
                 drawer.setAttribute('aria-hidden', 'true');
+                drawer.id = 'yea-mobile-navigation';
+                drawer.setAttribute('role', 'dialog');
+                drawer.setAttribute('aria-modal', 'true');
+                drawer.setAttribute('aria-label', labels.menuLabel || 'Navigation');
                 drawer.innerHTML = '<div class="container yea-mobile-drawer__inner"></div>';
                 header.appendChild(drawer);
             }
@@ -457,7 +479,7 @@
                 const itemLabel = children.link ? children.link.textContent.trim() : 'submenu';
 
                 toggle.setAttribute('aria-controls', children.submenu.id);
-                toggle.setAttribute('aria-label', 'Toggle ' + itemLabel + ' submenu');
+                toggle.setAttribute('aria-label', (labels.toggleSubmenu || 'Toggle submenu:') + ' ' + itemLabel);
 
                 const shouldStartOpen = item.classList.contains('current-menu-item') ||
                     item.classList.contains('current-menu-ancestor') ||
@@ -487,9 +509,7 @@
 
                 toggle.addEventListener('click', toggleAccordion);
 
-                if (children.link) {
-                    children.link.addEventListener('click', toggleAccordion);
-                }
+                // Parent labels stay ordinary links; only the button expands.
             });
         }
 
@@ -499,6 +519,9 @@
             }
 
             menu.classList.add('yea-mobile-nav-list');
+            menu.querySelectorAll('.sub-menu').forEach(function(submenu) {
+                submenu.classList.add('wp-block-navigation__submenu-container');
+            });
             menu.removeAttribute('id');
             menu.removeAttribute('style');
             menu.removeAttribute('hidden');
@@ -506,6 +529,12 @@
 
             menu.querySelectorAll('[id]').forEach(function(element) {
                 element.removeAttribute('id');
+            });
+
+            [menu].concat(Array.from(menu.querySelectorAll('*'))).forEach(function(element) {
+                Array.from(element.attributes).forEach(function(attribute) {
+                    if (attribute.name.indexOf('data-wp-') === 0) element.removeAttribute(attribute.name);
+                });
             });
 
             menu.querySelectorAll('[style], [hidden]').forEach(function(element) {
@@ -539,6 +568,7 @@
         }
 
         function renderMobileDrawer() {
+            if (!menuDirty) return;
             const drawer = ensureMobileDrawer();
             const drawerInner = drawer.querySelector('.yea-mobile-drawer__inner');
             const desktopMenu = getDesktopMenu();
@@ -548,6 +578,12 @@
             }
 
             drawerInner.innerHTML = '';
+            const closeButton = document.createElement('button');
+            closeButton.type = 'button';
+            closeButton.className = 'yea-menu-close';
+            closeButton.textContent = labels.closeMenu || 'Close menu';
+            closeButton.addEventListener('click', function() { setMenuOpen(false); });
+            drawerInner.appendChild(closeButton);
 
             if (desktopMenu) {
                 const clonedMenu = desktopMenu.cloneNode(true);
@@ -568,39 +604,57 @@
                 }
             }
 
+            if (drawerInner.querySelectorAll('a').length === 0) return false;
+
             if (desktopActions && desktopActions.innerHTML.trim() !== '') {
                 const mobileActions = document.createElement('div');
                 mobileActions.className = desktopActions.className;
                 mobileActions.classList.add('header-actions--mobile');
+                mobileActions.removeAttribute('id');
                 mobileActions.innerHTML = desktopActions.innerHTML;
+                mobileActions.querySelectorAll('.menu-toggle').forEach(function(button) { button.remove(); });
+                mobileActions.querySelectorAll('[id]').forEach(function(element) { element.removeAttribute('id'); });
                 drawerInner.appendChild(mobileActions);
             }
+            menuDirty = false;
         }
 
-        function setMenuOpen(isOpen) {
+        function setMenuOpen(isOpen, restoreFocus) {
             const drawer = ensureMobileDrawer();
             const shouldOpen = isOpen && isMobileViewport();
-
+            const wasOpen = header.classList.contains('menu-open');
+            if (shouldOpen) renderMobileDrawer();
             header.classList.toggle('menu-open', shouldOpen);
-            openButton.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
-            openButton.setAttribute('aria-label', shouldOpen ? 'Close menu' : 'Open menu');
-
-            drawer.setAttribute('aria-hidden', shouldOpen ? 'false' : 'true');
-
-            if (responsiveContainer) {
-                responsiveContainer.classList.remove('is-menu-open');
-                responsiveContainer.setAttribute('aria-hidden', 'true');
-                responsiveContainer.setAttribute('hidden', 'hidden');
-            }
-
-            document.documentElement.classList.toggle('has-modal-open', shouldOpen);
-            document.body.classList.toggle('has-modal-open', shouldOpen);
-
-            if (shouldOpen) {
-                renderMobileDrawer();
-                drawer.removeAttribute('hidden');
-            } else {
-                drawer.setAttribute('hidden', 'hidden');
+            openButton.setAttribute('aria-expanded', String(shouldOpen));
+            openButton.setAttribute('aria-label', shouldOpen ? (labels.closeMenu || 'Close menu') : (labels.openMenu || 'Open menu'));
+            drawer.setAttribute('aria-hidden', String(!shouldOpen));
+            drawer.hidden = !shouldOpen;
+            // Core's desktop container remains intact. CSS suppresses it on mobile only.
+            if (shouldOpen && !wasOpen) {
+                returnFocus = document.activeElement;
+                scrollLocks = [document.documentElement, document.body].map(function(element) {
+                    const existed = element.classList.contains('has-modal-open');
+                    element.classList.add('has-modal-open');
+                    return {element: element, existed: existed};
+                });
+                inertRegions = Array.from(document.querySelectorAll('main, .site-footer, footer.wp-block-template-part'))
+                    .filter(function(element) { return !element.contains(header); })
+                    .map(function(element) {
+                        const previous = element.inert;
+                        element.inert = true;
+                        return {element: element, previous: previous};
+                    });
+                drawer.querySelector('.yea-menu-close').focus();
+            } else if (!shouldOpen && wasOpen) {
+                inertRegions.forEach(function(region) { region.element.inert = region.previous; });
+                scrollLocks.forEach(function(lock) { if (!lock.existed) lock.element.classList.remove('has-modal-open'); });
+                inertRegions = [];
+                scrollLocks = [];
+                if (restoreFocus !== false && returnFocus && returnFocus.isConnected) returnFocus.focus();
+                else if (drawer.contains(document.activeElement)) {
+                    const desktopLink = getMenuLinks(navigation)[0];
+                    if (desktopLink) desktopLink.focus();
+                }
             }
         }
 
@@ -608,14 +662,8 @@
             setMenuOpen(!header.classList.contains('menu-open'));
         }
 
-        if (responsiveContainer) {
-            responsiveContainer.classList.remove('is-menu-open');
-            responsiveContainer.setAttribute('aria-hidden', 'true');
-            responsiveContainer.setAttribute('hidden', 'hidden');
-        }
-
         openButton.addEventListener('click', function(event) {
-            if (!isMobileViewport()) {
+            if (!isMobileViewport() || !header.classList.contains('yea-nav-ready')) {
                 return;
             }
 
@@ -644,25 +692,29 @@
         });
 
         document.addEventListener('keydown', function(event) {
+            if (!header.classList.contains('menu-open')) return;
             if (event.key === 'Escape') {
+                event.preventDefault();
                 setMenuOpen(false);
+            }
+            if (event.key === 'Tab') {
+                const items = Array.from(drawer.querySelectorAll('a[href], button:not([disabled]), [tabindex="0"]'))
+                    .filter(function(element) { return element.getClientRects().length > 0; });
+                const first = items[0];
+                const last = items[items.length - 1];
+                if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+                else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
             }
         });
 
         window.addEventListener('resize', function() {
-            if (isMobileViewport()) {
-                renderMobileDrawer();
-                return;
-            }
-
-            setMenuOpen(false);
+            // Do not rebuild an open drawer: rotation/browser chrome must not lose focus.
+            if (!isMobileViewport()) setMenuOpen(false, false);
         });
 
         if ('MutationObserver' in window) {
             const observer = new MutationObserver(function() {
-                if (isMobileViewport() || header.classList.contains('menu-open')) {
-                    renderMobileDrawer();
-                }
+                menuDirty = true;
             });
 
             observer.observe(navigation, {
@@ -681,6 +733,10 @@
         }
 
         renderMobileDrawer();
+        if (!drawer.querySelector('a[href]')) return;
+        openButton.setAttribute('aria-controls', drawer.id);
+        openButton.setAttribute('aria-haspopup', 'dialog');
+        header.classList.add('yea-nav-ready');
         setMenuOpen(false);
     });
 })();

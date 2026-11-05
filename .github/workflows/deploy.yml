@@ -32,6 +32,18 @@ jobs:
       - name: Check PHP syntax
         run: find . -type f -name '*.php' -not -path './node_modules/*' -not -path './vendor/*' -print0 | xargs -0 -r -n1 php -l
 
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install validation dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Validate JavaScript, CSS and navigation
+        run: npm test
+
       - name: Deploy theme using FTPS
         uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         with:
@@ -48,6 +60,12 @@ jobs:
             **/.git*
             **/.git*/**
             **/node_modules/**
+            tests/**
+            test-results/**
+            playwright-report/**
+            package.json
+            package-lock.json
+            README.md
             **/.env
             **/.env.*
             **/*.sql

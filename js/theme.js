@@ -282,7 +282,6 @@
         const navigation = header ? header.querySelector('.header-inner > .nav') : null;
         const openButton = navigation ? (navigation.querySelector('.wp-block-navigation__responsive-container-open') || header.querySelector('#menu-toggle')) : null;
         const responsiveContainer = navigation ? navigation.querySelector('.wp-block-navigation__responsive-container') : null;
-        const desktopActions = header ? header.querySelector('.header-inner > .header-actions') : null;
 
         if (!header || !navigation || !openButton) return;
         const labels = window.yeaOptions || {};
@@ -388,131 +387,6 @@
             return drawer;
         }
 
-        let mobileSubmenuId = 0;
-
-        function getDirectChild(element, selector) {
-            return Array.from(element.children).find(function(child) {
-                return child.matches(selector);
-            }) || null;
-        }
-
-        function getAccordionItemChildren(item) {
-            return {
-                link: getDirectChild(item, 'a, .wp-block-navigation-item__content, .wp-block-pages-list__item__link'),
-                toggle: getDirectChild(item, '.wp-block-navigation-submenu__toggle'),
-                submenu: getDirectChild(item, '.wp-block-navigation__submenu-container, ul'),
-            };
-        }
-
-        function setAccordionState(item, isOpen) {
-            const children = getAccordionItemChildren(item);
-
-            if (!children.submenu || !children.toggle) {
-                return;
-            }
-
-            item.classList.toggle('is-accordion-open', isOpen);
-            children.submenu.hidden = !isOpen;
-            children.submenu.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
-            children.submenu.classList.toggle('is-menu-open', isOpen);
-            children.toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-        }
-
-        function closeNestedAccordions(root) {
-            if (!root) {
-                return;
-            }
-
-            root.querySelectorAll('.yea-mobile-has-submenu.is-accordion-open').forEach(function(item) {
-                setAccordionState(item, false);
-            });
-        }
-
-        function closeAccordionSiblings(item) {
-            const parentList = item.parentElement;
-
-            if (!parentList) {
-                return;
-            }
-
-            Array.from(parentList.children).forEach(function(sibling) {
-                if (sibling === item || !sibling.classList.contains('yea-mobile-has-submenu')) {
-                    return;
-                }
-
-                setAccordionState(sibling, false);
-                closeNestedAccordions(getAccordionItemChildren(sibling).submenu);
-            });
-        }
-
-        function setupMobileAccordion(menu) {
-            menu.querySelectorAll('li').forEach(function(item) {
-                const children = getAccordionItemChildren(item);
-
-                if (!children.submenu) {
-                    return;
-                }
-
-                item.classList.add('yea-mobile-has-submenu');
-
-                let toggle = children.toggle;
-
-                if (!toggle) {
-                    toggle = document.createElement('button');
-                    toggle.className = 'wp-block-navigation-submenu__toggle';
-
-                    if (children.link) {
-                        children.link.insertAdjacentElement('afterend', toggle);
-                    } else {
-                        item.insertBefore(toggle, children.submenu);
-                    }
-                }
-
-                toggle.setAttribute('type', 'button');
-                toggle.innerHTML = '';
-
-                if (!children.submenu.id) {
-                    mobileSubmenuId += 1;
-                    children.submenu.id = 'yea-mobile-submenu-' + mobileSubmenuId;
-                }
-
-                const itemLabel = children.link ? children.link.textContent.trim() : 'submenu';
-
-                toggle.setAttribute('aria-controls', children.submenu.id);
-                toggle.setAttribute('aria-label', (labels.toggleSubmenu || 'Toggle submenu:') + ' ' + itemLabel);
-
-                const shouldStartOpen = item.classList.contains('current-menu-item') ||
-                    item.classList.contains('current-menu-ancestor') ||
-                    item.classList.contains('current_page_item') ||
-                    item.classList.contains('current_page_ancestor') ||
-                    item.classList.contains('current-page-ancestor');
-
-                setAccordionState(item, shouldStartOpen);
-
-                const toggleAccordion = function(event) {
-                    if (!isMobileViewport()) {
-                        return;
-                    }
-
-                    event.preventDefault();
-                    event.stopPropagation();
-
-                    const shouldOpen = !item.classList.contains('is-accordion-open');
-
-                    closeAccordionSiblings(item);
-                    setAccordionState(item, shouldOpen);
-
-                    if (!shouldOpen) {
-                        closeNestedAccordions(children.submenu);
-                    }
-                };
-
-                toggle.addEventListener('click', toggleAccordion);
-
-                // Parent labels stay ordinary links; only the button expands.
-            });
-        }
-
         function sanitizeClonedMenu(menu) {
             if (!menu) {
                 return;
@@ -559,12 +433,15 @@
             });
 
             menu.querySelectorAll('.wp-block-navigation__submenu-container, ul ul').forEach(function(submenu) {
-                submenu.setAttribute('aria-hidden', 'true');
+                submenu.setAttribute('aria-hidden', 'false');
                 submenu.classList.remove('is-menu-open');
-                submenu.setAttribute('hidden', 'hidden');
+                submenu.removeAttribute('hidden');
             });
 
-            setupMobileAccordion(menu);
+            menu.querySelectorAll('.wp-block-navigation-submenu__toggle').forEach(function(button) { button.remove(); });
+            menu.querySelectorAll('li').forEach(function(item) {
+                if (Array.from(item.children).some(function(child) { return child.tagName === 'UL'; })) item.classList.add('yea-mobile-group');
+            });
         }
 
         function renderMobileDrawer() {
@@ -606,16 +483,6 @@
 
             if (drawerInner.querySelectorAll('a').length === 0) return false;
 
-            if (desktopActions && desktopActions.innerHTML.trim() !== '') {
-                const mobileActions = document.createElement('div');
-                mobileActions.className = desktopActions.className;
-                mobileActions.classList.add('header-actions--mobile');
-                mobileActions.removeAttribute('id');
-                mobileActions.innerHTML = desktopActions.innerHTML;
-                mobileActions.querySelectorAll('.menu-toggle').forEach(function(button) { button.remove(); });
-                mobileActions.querySelectorAll('[id]').forEach(function(element) { element.removeAttribute('id'); });
-                drawerInner.appendChild(mobileActions);
-            }
             menuDirty = false;
         }
 
@@ -623,6 +490,7 @@
             const drawer = ensureMobileDrawer();
             const shouldOpen = isOpen && isMobileViewport();
             const wasOpen = header.classList.contains('menu-open');
+            header.style.setProperty('--yea-header-height', header.offsetHeight + 'px');
             if (shouldOpen) renderMobileDrawer();
             header.classList.toggle('menu-open', shouldOpen);
             openButton.setAttribute('aria-expanded', String(shouldOpen));
@@ -709,6 +577,7 @@
 
         window.addEventListener('resize', function() {
             // Do not rebuild an open drawer: rotation/browser chrome must not lose focus.
+            header.style.setProperty('--yea-header-height', header.offsetHeight + 'px');
             if (!isMobileViewport()) setMenuOpen(false, false);
         });
 
@@ -723,13 +592,6 @@
                 attributes: true,
             });
 
-            if (desktopActions) {
-                observer.observe(desktopActions, {
-                    childList: true,
-                    subtree: true,
-                    attributes: true,
-                });
-            }
         }
 
         renderMobileDrawer();

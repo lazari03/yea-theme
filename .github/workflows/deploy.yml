@@ -66,6 +66,8 @@ jobs:
             package.json
             package-lock.json
             README.md
+            progress.md
+            docs/**
             **/.env
             **/.env.*
             **/*.sql

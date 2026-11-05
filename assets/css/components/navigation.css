@@ -1,0 +1,65 @@
+/* Navigation content is provided by WordPress menus, not a theme link array. */
+.header-inner { grid-template-columns: auto minmax(0, 1fr); }
+.header-inner > .nav.wp-block-navigation,
+.nav .wp-block-navigation__container { justify-content: flex-end; }
+@media (max-width: 1024px) {
+  .yea-mobile-drawer {
+    top: 100%;
+    height: calc(100vh - var(--yea-header-height, 72px));
+    height: calc(100dvh - var(--yea-header-height, 72px));
+    max-height: calc(100vh - var(--yea-header-height, 72px));
+    max-height: calc(100dvh - var(--yea-header-height, 72px));
+    background: var(--card);
+    box-shadow: none;
+  }
+  .yea-mobile-drawer__inner { gap: 24px; padding-block: 24px; }
+  .yea-mobile-drawer .yea-mobile-nav-list {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px !important;
+    align-items: start;
+  }
+  .yea-mobile-drawer .yea-mobile-nav-list > li,
+  .yea-mobile-drawer .wp-block-navigation-item { display: block; border: 0; }
+  .yea-mobile-drawer .yea-mobile-group > a {
+    padding: 4px 0 12px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--primary-dark) !important;
+  }
+  .yea-mobile-drawer .wp-block-navigation__submenu-container,
+  .yea-mobile-drawer ul ul {
+    display: flex !important;
+    position: static !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    flex-direction: column;
+    gap: 0;
+    padding: 0;
+    margin: 0;
+  }
+  .yea-mobile-drawer .yea-mobile-nav-list a {
+    padding: 14px 0;
+    min-height: 48px;
+    line-height: 1.45;
+    font-size: 1.0625rem;
+    font-weight: 500;
+    border-bottom: 1px solid var(--line);
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .yea-mobile-drawer .yea-mobile-group > a { font-weight: 700; }
+  .yea-mobile-drawer .wp-block-navigation-submenu__toggle { display: none !important; }
+}
+@media (min-width: 600px) and (max-width: 1024px) {
+  .yea-mobile-drawer .yea-mobile-nav-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 40px !important; }
+}
+@media (max-width: 1024px) {
+  .yea-mobile-drawer .wp-block-navigation-item__content .wp-block-navigation-item__label { display: inline; padding: 0; font: inherit; }
+  .yea-mobile-drawer .yea-mobile-nav-list a { border-radius: 0; }
+  .yea-mobile-drawer .yea-mobile-nav-list { gap: 12px !important; }
+  .yea-mobile-drawer .yea-menu-close { align-self: flex-end; padding: 8px 14px; min-height: 44px; }
+}

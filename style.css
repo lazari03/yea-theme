@@ -4,7 +4,7 @@ Theme URI: https://yea.al
 Author: YEA Team
 Author URI: https://yea.al
 Description: A modern Gutenberg-first WordPress theme for Young Entrepreneurs Albania. Features include editable block patterns, dynamic templates, premium components, and full Site Editor support.
-Version: 1.3.51
+Version: 1.3.52
 License: GPL v2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain: yea-theme
@@ -2833,9 +2833,6 @@ label {
 .yea-accordion-copy .wp-block-image,
 .testimonial-meta .wp-block-image,
 .team-card .wp-block-image,
-.logo-wall-card .wp-block-image {
-  margin: 0;
-}
 
 .yea-accordion-copy .wp-block-image img {
   width: 100%;
@@ -2991,43 +2988,10 @@ label {
   font-weight: 700;
 }
 
-.logo-wall-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 16px;
-}
 
-.logo-wall-card {
-  min-height: 120px;
-  display: grid;
-  align-items: center;
-  justify-items: center;
-  gap: 10px;
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 24px;
-  padding: 20px;
-  box-shadow: var(--shadow);
-  transition: var(--transition-bounce);
-}
 
-.logo-wall-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-hover);
-}
 
-.logo-wall-card img {
-  max-width: 100%;
-  max-height: 56px;
-  object-fit: contain;
-}
 
-.logo-wall-card p {
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.85rem;
-  font-weight: 700;
-}
 
 .form-section-copy {
   display: grid;
@@ -3151,9 +3115,6 @@ label {
   .contact-details,
   .faq-grid,
   .team-grid,
-  .logo-wall-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
 
   .hero-grid {
     padding: 44px 0 36px;
@@ -3636,30 +3597,9 @@ label {
     font-size: 0.92rem;
   }
 
-  .logo-wall-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-  }
 
-  .logo-wall-card {
-    min-height: 104px;
-    padding: 16px 14px;
-    gap: 8px;
-    border-radius: 20px;
-  }
 
-  .logo-wall-card img {
-    width: 100%;
-    height: 42px;
-    max-height: 42px;
-    object-fit: contain;
-  }
 
-  .logo-wall-card p {
-    text-align: center;
-    font-size: 0.78rem;
-    line-height: 1.35;
-  }
 
   .mosaic { grid-auto-rows: 220px; }
   .community-copy {
@@ -4113,15 +4053,7 @@ label {
     font-size: clamp(1.7rem, 9vw, 2.2rem);
   }
 
-  .logo-wall-card {
-    min-height: 96px;
-    padding: 14px 10px;
-  }
 
-  .logo-wall-card img {
-    height: 38px;
-    max-height: 38px;
-  }
 
   .contact-card,
   .contact-form-shell,
@@ -4362,17 +4294,6 @@ h1, h2, h3, h4, h5, h6,
 }
 
 /* Saved logo blocks can carry inline pixel widths larger than a mobile card. */
-.logo-wall-card, .logos > *, .logo-wall-grid > * { min-width: 0; }
-.logo-wall-card .wp-block-image {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  margin-inline: 0;
-}
-.logo-wall-card .wp-block-image img {
-  max-width: 100%;
-  object-fit: contain !important;
-}
 
 .program-card.wp-block-cover { background-color: var(--ink); }
 .program-card:hover, .program-card:hover .tag, .program-card:hover h3,

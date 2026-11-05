@@ -67,31 +67,6 @@
             ?>
         </nav>
 
-        <!-- Header Actions -->
-        <div class="header-actions">
-            <?php 
-            // Check if Donors menu exists and has items
-            if (has_nav_menu('donors')) : 
-                wp_nav_menu(array(
-                    'theme_location' => 'donors',
-                    'menu_class'     => 'donors-menu',
-                    'container'      => false,
-                    'items_wrap'     => '<ul class="%2$s">%3$s</ul>',
-                    'fallback_cb'    => false,
-                ));
-            else : 
-            ?>
-                <a class="btn btn-secondary" href="<?php echo esc_url(home_url('/#transparency')); ?>">
-                    <?php esc_html_e('For Donors', 'yea-theme'); ?>
-                </a>
-            <?php endif; ?>
-            
-            <a class="btn btn-primary" href="<?php echo esc_url(yea_resolve_header_url(get_theme_mod('yea_header_join_url', '#join'))); ?>">
-                <?php esc_html_e('Join YEA', 'yea-theme'); ?>
-            </a>
-            
-
-        </div>
         <!-- Mobile Menu Toggle -->
         <button class="menu-toggle" id="menu-toggle" type="button" aria-controls="primary-menu" aria-expanded="false" aria-label="<?php esc_attr_e('Toggle Menu', 'yea-theme'); ?>">
                 <span></span>

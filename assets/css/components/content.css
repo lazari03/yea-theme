@@ -1,0 +1,22 @@
+/* Remove only the template gap between the header and the main canvas. */
+.wp-site-blocks > .site-main,
+.wp-site-blocks > main,
+.wp-site-blocks > .wp-block-template-part + .site-main { margin-block-start: 0; }
+/* Figure blocks own their spacing; an image inside one must not add another gap. */
+.entry-content .wp-block-image img,
+.wp-block-post-content .wp-block-image img { margin-block: 0; }
+/* Keep article images at their authored size and native proportions. */
+.entry-content img,
+.wp-block-post-content img { max-inline-size: 100%; }
+.entry-content > img { height: auto; }
+/* Native table block: scroll the table rather than the whole page on phones. */
+.wp-block-table { max-inline-size: 100%; overflow-x: auto; overscroll-behavior-inline: contain; }
+.wp-block-table table { inline-size: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.wp-block-table :is(th, td) { padding: 0.875rem 1rem; border: 1px solid var(--line); text-align: start; vertical-align: top; line-height: 1.55; }
+.wp-block-table th { background: var(--soft); color: var(--ink); font-weight: 700; }
+.wp-block-table figcaption { color: var(--muted); font-size: 0.9375rem; line-height: 1.5; }
+.entry-content :is(p, li),
+.wp-block-post-content :is(p, li) { overflow-wrap: break-word; }
+@media (max-width: 600px) {
+  .wp-block-table :is(th, td) { padding: 0.75rem; }
+}

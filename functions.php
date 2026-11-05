@@ -10,7 +10,9 @@ if (!defined('ABSPATH')) {
 }
 
 // Define theme version
-define('YEA_VERSION', '1.3.51');
+define('YEA_VERSION', '1.3.52');
+
+require_once get_template_directory() . '/inc/partner-logos.php';
 
 /**
  * Theme Setup
@@ -26,7 +28,7 @@ function yea_theme_setup() {
     add_theme_support('wp-block-styles');
     add_theme_support('align-wide');
     add_theme_support('editor-styles');
-    add_editor_style(array('style.css', 'editor-style.css'));
+    add_editor_style(array('style.css', 'editor-style.css', 'assets/css/components/partner-logos.css', 'assets/css/components/navigation.css', 'assets/css/components/content.css', 'assets/css/components/forms.css'));
     add_theme_support('custom-logo', array(
         'height'      => 100,
         'width'       => 300,
@@ -63,6 +65,12 @@ function yea_enqueue_scripts() {
     // Main stylesheet
     wp_enqueue_style('yea-style', get_stylesheet_uri(), array(), YEA_VERSION);
     
+    wp_enqueue_style('yea-partner-logos', get_template_directory_uri() . '/assets/css/components/partner-logos.css', array('yea-style'), YEA_VERSION);
+    wp_enqueue_style('yea-navigation', get_template_directory_uri() . '/assets/css/components/navigation.css', array('yea-style'), YEA_VERSION);
+
+    wp_enqueue_style('yea-content', get_template_directory_uri() . '/assets/css/components/content.css', array('yea-style'), YEA_VERSION);
+    wp_enqueue_style('yea-forms', get_template_directory_uri() . '/assets/css/components/forms.css', array('yea-style'), YEA_VERSION);
+
     // Theme scripts
     wp_enqueue_script('yea-theme', get_template_directory_uri() . '/js/theme.js', array(), YEA_VERSION, true);
     

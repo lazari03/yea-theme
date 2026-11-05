@@ -14,13 +14,15 @@
 <body <?php body_class(); ?>>
 <?php wp_body_open(); ?>
 
+<a class="skip-link screen-reader-text" href="#main-content"><?php esc_html_e('Skip to content', 'yea-theme'); ?></a>
+
 <!-- Ambient Background -->
 <div class="ambient-bg"></div>
 
 <header class="site-header" id="header">
     <div class="container header-inner">
         <!-- Brand / Logo -->
-        <a href="<?php echo esc_url(home_url('/')); ?>" class="brand" rel="home">
+        <div class="brand">
             <?php if (has_custom_logo()) : ?>
                 <div class="brand-logo">
                     <?php the_custom_logo(); ?>
@@ -40,7 +42,7 @@
                 </div>
             <?php endif; ?>
             
-            <div class="brand-copy">
+            <a class="brand-copy" href="<?php echo esc_url(home_url('/')); ?>" rel="home">
                 <?php bloginfo('name'); ?>
                 <?php 
                 $tagline = get_theme_mod('yea_site_tagline', get_bloginfo('description'));
@@ -48,8 +50,8 @@
                 ?>
                     <small><?php echo esc_html($tagline); ?></small>
                 <?php endif; ?>
-            </div>
-        </a>
+            </a>
+        </div>
 
         <!-- Primary Navigation -->
         <nav class="nav" id="primary-nav">
@@ -74,27 +76,28 @@
                     'theme_location' => 'donors',
                     'menu_class'     => 'donors-menu',
                     'container'      => false,
-                    'items_wrap'     => '<a class="btn btn-secondary" href="%2$s">%3$s</a>',
+                    'items_wrap'     => '<ul class="%2$s">%3$s</ul>',
                     'fallback_cb'    => false,
                 ));
             else : 
             ?>
-                <a class="btn btn-secondary" href="#transparency">
+                <a class="btn btn-secondary" href="<?php echo esc_url(home_url('/#transparency')); ?>">
                     <?php esc_html_e('For Donors', 'yea-theme'); ?>
                 </a>
             <?php endif; ?>
             
-            <a class="btn btn-primary" href="#join">
+            <a class="btn btn-primary" href="<?php echo esc_url(yea_resolve_header_url(get_theme_mod('yea_header_join_url', '#join'))); ?>">
                 <?php esc_html_e('Join YEA', 'yea-theme'); ?>
             </a>
             
-            <!-- Mobile Menu Toggle -->
-            <button class="menu-toggle" id="menu-toggle" aria-label="<?php esc_attr_e('Toggle Menu', 'yea-theme'); ?>">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
+
         </div>
+        <!-- Mobile Menu Toggle -->
+        <button class="menu-toggle" id="menu-toggle" type="button" aria-controls="primary-menu" aria-expanded="false" aria-label="<?php esc_attr_e('Toggle Menu', 'yea-theme'); ?>">
+                <span></span>
+                <span></span>
+                <span></span>
+        </button>
     </div>
 </header>
 

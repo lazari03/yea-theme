@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define theme version
-define('YEA_VERSION', '1.3.50');
+define('YEA_VERSION', '1.3.51');
 
 /**
  * Theme Setup
@@ -58,7 +58,7 @@ add_action('after_setup_theme', 'yea_theme_setup');
  */
 function yea_enqueue_scripts() {
     // Google Fonts
-    wp_enqueue_style('yea-google-fonts', 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap', array(), null);
+    wp_enqueue_style('yea-google-fonts', 'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap', array(), null);
     
     // Main stylesheet
     wp_enqueue_style('yea-style', get_stylesheet_uri(), array(), YEA_VERSION);
@@ -68,6 +68,10 @@ function yea_enqueue_scripts() {
     
     // Pass theme options to JavaScript
     wp_localize_script('yea-theme', 'yeaOptions', array(
+        'openMenu' => __('Open menu', 'yea-theme'),
+        'closeMenu' => __('Close menu', 'yea-theme'),
+        'menuLabel' => __('Navigation', 'yea-theme'),
+        'toggleSubmenu' => __('Toggle submenu:', 'yea-theme'),
         'ajaxUrl' => admin_url('admin-ajax.php'),
         'nonce'   => wp_create_nonce('yea_nonce'),
     ));
@@ -847,6 +851,12 @@ function yea_breadcrumbs_shortcode() {
 }
 add_shortcode('yea_breadcrumbs', 'yea_breadcrumbs_shortcode');
 
+/** Resolve header fragments against the homepage; preserve configured URLs. */
+function yea_resolve_header_url($url) {
+    $url = trim((string) $url);
+    return 0 === strpos($url, '#') ? home_url('/' . $url) : $url;
+}
+
 /**
  * Get header CTA button markup for desktop and mobile contexts.
  *
@@ -877,7 +887,7 @@ function yea_get_header_ctas_markup($context = 'desktop') {
         $items .= sprintf(
             '<div class="%1$s"><a class="wp-block-button__link wp-element-button" href="%2$s">%3$s</a></div>',
             esc_attr($button_class),
-            esc_url($button['url']),
+            esc_url(yea_resolve_header_url($button['url'])),
             esc_html($button['text'])
         );
     }
@@ -1208,7 +1218,7 @@ function yea_remove_header_donor_button($block_content, $block) {
     $donor_text = trim((string) get_theme_mod('yea_header_donors_text', __('For Donors', 'yea-theme')));
     $donor_url = trim((string) get_theme_mod('yea_header_donors_url', '#transparency'));
     $join_text = trim((string) get_theme_mod('yea_header_join_text', __('Join YEA', 'yea-theme')));
-    $join_url = trim((string) get_theme_mod('yea_header_join_url', '#join'));
+    $join_url = yea_resolve_header_url(get_theme_mod('yea_header_join_url', '#join'));
 
     $dom = new DOMDocument();
     $previous_state = libxml_use_internal_errors(true);

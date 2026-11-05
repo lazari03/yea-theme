@@ -11,6 +11,7 @@ function check_theme($condition, $message) {
 }
 $terms = array();
 $posts = array();
+$attachment_id = 0;
 try {
     foreach (array('alpha', 'beta', 'outside') as $label) {
         $result = wp_insert_term('Fixture ' . $label . ' ' . uniqid(), 'category');
@@ -36,8 +37,24 @@ try {
     check_theme((int) $changed->found_posts === 2, 'Changing editor-selected terms must update the feed');
     $original = '<div><img class="wp-image-999999" src="example.png" alt="Original"></div>';
     check_theme(yea_render_partner_logos($original, array('attrs' => array('className' => 'article'))) === $original, 'Logo sizing must never affect article images');
+    if (function_exists('imagecreatetruecolor') && class_exists('DOMDocument')) {
+        $image = imagecreatetruecolor(40, 40);
+        imagefill($image, 0, 0, imagecolorallocate($image, 255, 255, 255));
+        imagefilledrectangle($image, 12, 15, 28, 25, imagecolorallocate($image, 0, 0, 0));
+        ob_start(); imagepng($image); $bytes = ob_get_clean(); imagedestroy($image);
+        $upload = wp_upload_bits('logo-fixture-' . uniqid() . '.png', null, $bytes);
+        check_theme(empty($upload['error']), 'Cannot write logo fixture');
+        $attachment_id = wp_insert_attachment(array('post_mime_type' => 'image/png', 'post_title' => 'Logo fixture', 'post_status' => 'inherit'), $upload['file']);
+        $markup = '<div><img class="wp-image-' . $attachment_id . '" src="fixture.png" sizes="auto, (max-width: 300px) 100vw, 300px" width="40" height="40" loading="lazy"></div>';
+        $rendered = yea_render_partner_logos($markup, array('attrs' => array('className' => 'logo-wall-grid')));
+        check_theme(strpos($rendered, 'yea-partner-logo-canvas') !== false, 'Logo wrapper missing');
+        check_theme(strpos($rendered, 'sizes="auto') === false, 'Optical logo must not use native auto-size containment');
+        check_theme(strpos($rendered, '(max-width: 300px) 100vw, 300px') !== false, 'Explicit responsive sizes must survive');
+        check_theme(yea_render_partner_logos($markup, array('attrs' => array('className' => 'article'))) === $markup, 'Article responsive sizes must stay unchanged');
+    }
     echo "Passed isolated WordPress taxonomy, pagination and image isolation checks.\n";
 } finally {
+    if ($attachment_id) { wp_delete_attachment($attachment_id, true); }
     foreach ($posts as $post) { if (!is_wp_error($post)) { wp_delete_post($post, true); } }
     foreach ($terms as $term) { wp_delete_term($term, 'category'); }
 }

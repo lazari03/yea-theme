@@ -1,6 +1,6 @@
 # Theme improvement progress
 
-Updated: 2026-11-05. Release candidate: 1.3.52. Work branch: `improve/programs-forms-and-languages` (the branch name predates clarification; no language changes are included).
+Updated: 2026-11-05. Release candidate: 1.3.53. Work branch: `improve/programs-forms-and-languages` (the branch name predates clarification; no language changes are included).
 
 ## Scope
 
@@ -26,8 +26,20 @@ Small reversible fixes. Keep colors, original photos, written content, existing 
 
 ## Production record
 
-No live writes or deployment in this work sequence yet. Saved menu/header/template edits require separate WordPress updates because theme files do not overwrite existing Site Editor customizations.
+- PR #2 merged as `2a77b6a`; GitHub validation and FTPS deployment succeeded for 1.3.52.
+- Saved header/nav restored with real links, Home and Lajmet-Blog labels, no menu signup CTA. Corrected Social Projects and duplicate/broken Code Week destinations.
+- Blog Home now uses editor-selected Blog/Latest News categories; REST reports 73 matching published posts, and the live first page has ten posts with pagination.
+- Reversibly drafted only three empty/abandoned unreferenced placeholders: Become A Teacher, Evaluation Criteria, and the old under-construction Debate page. No registrations/leads or historical project content deleted.
+- Corrected nine stale hrefs in Team, the annual report and the archived award page. Historical article URLs now use canonical destinations; the missing chocolate-distribution article links to the relevant social-project overview.
+- Production HTML confirmed all eight partner canvases rendered and the four component styles loaded at the new version.
+- Production snapshot checking uncovered a further lazy-image placeholder grid overflow that the isolated render did not reproduce. Added minimum-width containment to grid children/mosaic and block formatting for card-image links. The follow-up also removes `sizes=auto` only inside optical logo wrappers: native size containment was forcing a 1500px placeholder height. Explicit responsive sizes and article images are preserved. An isolated GD/DOM rendering test covers this regression. Desktop/phone screenshots now show every mark intact; the 12-width final sweep is in progress.
+- Offline screenshot fixtures replace remote asset URLs with local copies and disable external plugin scripts; they verify layout/theme behavior, not third-party plugin execution.
 
 ## Next checkpoint
 
 Complete screenshot review, publish the tested revision, apply narrowly scoped saved navigation/header/blog-template corrections, verify production output and record CI/deployment status here. Retain WordPress revisions and the prior theme revision for rollback.
+
+## Latest checkpoint
+
+- Live blog first page: 10 posts; eighth/final page: 3 posts, matching 73 total.
+- Additional public HTTP fetches of several inner pages hit proxy timeouts/errors; authenticated page/content inventory remains available. Do not treat these transport failures as proof that a page should be removed.

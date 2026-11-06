@@ -1,6 +1,6 @@
 # YEA WordPress theme
 
-A block theme with reusable page patterns, responsive navigation, article layouts, partner logos and form styling. Version 1.3.60. The release fixes layout glitches; it does not migrate content or add translations.
+A block theme with reusable page patterns, responsive navigation, article layouts, partner logos and form styling. Version 1.3.62. The release fixes layout glitches; it does not migrate content or add translations.
 
 ## Install and update
 
@@ -100,3 +100,13 @@ Assign the **YEA Award Submission Portal** template to registration/upload pages
 CF7 registration can opt into steps with a `.yea-award-form` wrapper and `.award-step` fieldsets, each with a unique `id`, `data-step-title`, and legend. Without enhancement all sections stay visible. The script checks required fields before advancing, preserves entered values while navigating, reveals CF7 server errors in their section, and shows `.award-success` only on `wpcf7mailsent`. CF7 still owns transport, validation and integrations; WPForms still owns project file uploads. Field names, file restrictions and integration mappings belong to form configuration, never the theme.
 
 The unified Award application includes document upload in its last CF7 step. The administrator-only `yea/v1/award-form/{id}` configuration endpoint reads the already configured Notion database schema and saves form markup without running the add-on's legacy editor hook that clears mappings on JSON saves. Explicit `field_properties` can reuse or add independent compatible properties; existing types and records are never rewritten. The existing Notion add-on saves application properties and the PDF link to one new record. Legacy entry pages can redirect to a canonical application through the editable integer `yea_award_portal_target` page meta.
+
+### Registration codes and delayed project delivery
+
+Registration is a four-step CF7 form. A server-generated 96-bit registration code is saved to the configured Notion record and shown in the confirmation, with a download action and a coordinator email template. Only a confirmed Notion record can produce a code receipt. A mail error never discards an already saved code.
+
+Use **Settings → YEA Award Portal → Open project delivery** to open or close the separate `[yea_award_delivery]` page. Delivery is closed by default. A valid registration code resolves exactly one project and grants a 30-minute upload session; only the project title is returned. Codes and session tokens are not stored in browser storage or URLs. Treat the registration code as private access to project delivery.
+
+Delivery accepts at most two PDF/PPT/PPTX files, 20 MB each, checked on the server. Files are uploaded to Notion's native file service and attached to the existing record in a dated delivery section. Earlier deliveries remain in the record. A server lock and receipt check protect retries within the same session. Closing the switch also blocks already unlocked sessions. No account or password is created.
+
+Local backend checks: `php tests/award-delivery.php`. The administrator-only workflow diagnostic creates a marked temporary Notion registration, verifies code lookup and native PDF/PowerPoint attachments, and archives the test record. It sends no form or confirmation emails.

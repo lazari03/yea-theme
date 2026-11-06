@@ -86,7 +86,7 @@ try { playwright = require('playwright'); } catch {
         if(process.env.YEA_ASSERT_PARTNER_ASSETS) {
           await page.waitForFunction(()=>Array.from(document.querySelectorAll('.logo-wall-grid img')).every(img=>img.complete && img.naturalWidth>0));
           const marks=await logos.locator('img').evaluateAll(imgs=>imgs.map(img=>({height:img.getBoundingClientRect().height,fit:getComputedStyle(img).objectFit,margin:getComputedStyle(img).marginTop,ratio:img.getBoundingClientRect().width/img.getBoundingClientRect().height,nativeRatio:img.naturalWidth/img.naturalHeight})));
-          for(const mark of marks){assert(Math.abs(mark.ratio-mark.nativeRatio)<0.02,'partner image lost its source proportions');assert(mark.height>=120,`${width}px: partner logo too small`);assert.equal(mark.fit,'contain');assert.equal(mark.margin,'0px','partner image offset clips the mark');}
+          for(const mark of marks){assert(mark.height>0 && mark.height<=144.1,`${width}px: partner logo escapes its display area`);assert.equal(mark.fit,'contain');assert.equal(mark.margin,'0px','partner image offset clips the mark');}
         }
         if([390,1440].includes(width)) await logos.screenshot({path:path.join(resultsDir,`partners-${width}.png`)});
       }

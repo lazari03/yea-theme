@@ -1,6 +1,6 @@
 # YEA WordPress theme
 
-A block theme with reusable page patterns, responsive navigation, article layouts, partner logos and form styling. Version 1.3.54. The release fixes layout glitches; it does not migrate content or add translations.
+A block theme with reusable page patterns, responsive navigation, article layouts, partner logos and form styling. Version 1.3.56. The release fixes layout glitches; it does not migrate content or add translations.
 
 ## Install and update
 
@@ -27,7 +27,7 @@ Saved header overrides take precedence over pattern files. To remove an old CTA 
 
 Insert **YEA Logo Wall**, replace its Image blocks with Media Library uploads, and add/remove cards in the editor. The outer group uses `logo-wall-grid`; each card uses `logo-wall-card`. Partner names, links and image IDs belong to content, not PHP arrays.
 
-Original uploads are unchanged. On hosts with GD and DOM, visible image bounds are measured once and cached to compensate for oversized white/transparent margins. Other hosts use proportional contain sizing. This processing applies only to the logo wall, never article photos. Use contrasting logo variants when the mark itself is white.
+Original uploads are unchanged. The editor and frontend show each complete image using proportional contain sizing, with no server-generated cropping windows or GD/DOM dependency. Logos fit within each card on desktop and mobile. Older cached optical wrappers are displayed without clipping. For artwork with large empty margins, prepare a tightly bounded upload in the Media Library; use contrasting variants for white marks.
 
 Optional wrapper CSS variables: `--partner-column-min`, `--partner-logo-size`, `--partner-card-height`, `--partner-gap`. Use normal Image blocks for photos outside this component.
 
@@ -76,6 +76,8 @@ npm run test:browser
 ```
 
 `YEA_CHROMIUM` is optional when Playwright's browser is installed. Optional `YEA_ASSET_CACHE` is a JSON URL map to `{file,mime}` cached assets; `YEA_FONT_CSS` is cached font CSS; `YEA_SCREENSHOTS` sets the output folder. The browser checks 12 widths (320–1440px), navigation/focus/no-JS behavior, header spacing, overflow, image proportions, forms and tables. It never submits a form. Set `YEA_ASSERT_PARTNER_ASSETS=1` when testing with real cached partner images.
+
+For an offline regression using eight varied logo fixtures, lazy loading, old cached wrappers and JavaScript on/off at 12 widths, run `YEA_CHROMIUM=/path/to/chromium node tests/logo-visibility.cjs` with Playwright available in development. It checks layout and visibility; it does not establish that production assets load.
 
 An additional test creates temporary posts/categories and removes them afterward. Run **only against an isolated database**:
 

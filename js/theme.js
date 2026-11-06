@@ -9,9 +9,7 @@
     // DOM Ready
     document.addEventListener('DOMContentLoaded', function() {
         initHeaderScroll();
-        initScrollReveal();
         initCounterAnimation();
-        initSmoothScroll();
         // Keep page content steady: decorative tilt and parallax are disabled.
     });
 
@@ -44,43 +42,6 @@
                 ticking = true;
             }
         }, { passive: true });
-    }
-
-    /**
-     * Scroll reveal animations
-     */
-    function initScrollReveal() {
-        const revealElements = document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale');
-        
-        if (revealElements.length === 0) return;
-        if (!('IntersectionObserver' in window)) {
-            // Fallback for browsers without IntersectionObserver
-            revealElements.forEach(function(el) {
-                el.classList.add('active');
-            });
-            return;
-        }
-
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver(function(entries) {
-            entries.forEach(function(entry) {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('active');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, observerOptions);
-
-        revealElements.forEach(function(el) {
-            observer.observe(el);
-            el.classList.add('reveal-pending');
-        });
     }
 
     /**
@@ -145,33 +106,8 @@
         requestAnimationFrame(updateCounter);
     }
 
-    /**
-     * Smooth scroll for anchor links
-     */
-    function initSmoothScroll() {
-        document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
-            anchor.addEventListener('click', function(e) {
-                const href = this.getAttribute('href');
-                if (href === '#') return;
-                
-                let id;
-                try { id = decodeURIComponent(href.slice(1)); } catch (error) { return; }
-                const target = document.getElementById(id);
-                if (!target) return;
-                
-                e.preventDefault();
-                
-                const headerOffset = 100;
-                const elementPosition = target.getBoundingClientRect().top;
-                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-                
-                window.scrollTo({
-                    top: offsetPosition,
-                    behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
-                });
-            });
-        });
-    }
+    // Anchor navigation uses the browser's native history and focus behavior.
+    // CSS controls smooth scrolling and respects reduced-motion preferences.
 
     /**
      * Parallax effect for hero cards

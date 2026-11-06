@@ -126,6 +126,9 @@ function yea_award_notion_delivery_check($form, $database, $columns) {
     $tags = array();
     foreach ($form->scan_form_tags() as $tag) { $tags[$tag->name] = $tag; }
     $values = array();
+    $temporary_pdf = wp_tempnam('award-delivery-check');
+    file_put_contents($temporary_pdf, "%PDF-1.4\n% Temporary integration fixture\n%%EOF\n");
+    $file_urls = array();
     foreach ($mapped as $name => $field) {
         $value = 'Temporary integration check';
         if ('title' === $field['notion_field_type']) { $value = 'YEA delivery check ' . gmdate('Y-m-d H:i:s') . ' (temporary)'; }
@@ -133,7 +136,7 @@ function yea_award_notion_delivery_check($form, $database, $columns) {
         if ('tel' === $field['type']) { $value = '+355000000000'; }
         if ('select' === $field['type']) { $value = array($tags[$name]->values[0]); }
         if ('file' === $field['type']) {
-            $value = array(home_url('/wp-content/uploads/2024/11/YEA-Awards-2025-Vol.-9_Info.pdf'));
+            $value = array($temporary_pdf);
         }
         $values[$field['notion_field_id']] = (object) array(
             'field_value' => $mapper->get_formatted_field_value($field['type'], $field['notion_field_type'], $value),
@@ -141,8 +144,20 @@ function yea_award_notion_delivery_check($form, $database, $columns) {
         );
     }
     $fields = \WPC_WPCF7_NTN\Helpers\prepare_fields_for_notion($values, $database);
+    foreach ($fields as $value) {
+        if (is_array($value) && isset($value['files'])) {
+            foreach ($value['files'] as $file) { $file_urls[] = $file['external']['url']; }
+        }
+    }
     $api = \wpconnect_wpcf7_notion_get_api();
     $result = $api->add_database_row($database, $fields);
+    wp_delete_file($temporary_pdf);
+    $uploads = wp_upload_dir();
+    foreach ($file_urls as $url) {
+        if (0 === strpos($url, trailingslashit($uploads['baseurl']) . 'wpc_wpcf7_notion_uploads/')) {
+            wp_delete_file($uploads['basedir'] . substr($url, strlen($uploads['baseurl'])));
+        }
+    }
     if (is_wp_error($result)) {
         return new WP_Error('yea_delivery_failed', 'Notion rejected the delivery check.', array('status' => 502, 'notion_error' => get_transient('yea_award_notion_last_error')));
     }

@@ -10,7 +10,9 @@ if (!defined('ABSPATH')) {
 }
 
 // Define theme version
-define('YEA_VERSION', '1.3.58');
+define('YEA_VERSION', '1.3.59');
+
+require_once get_template_directory() . '/inc/award-form-config.php';
 
 /**
  * Theme Setup

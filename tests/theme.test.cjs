@@ -76,7 +76,7 @@ test('reduced motion and no observer leave reveal content unhidden',async()=>{
  for(const options of [{observer:true},{reduced:true,observer:true},{}]) {const ctx=await boot(options);try{assert(!ctx.d.querySelector('.reveal').classList.contains('reveal-pending'));ctx.d.querySelector('a[href="#%E0%A4%A"]').click();assert.equal(ctx.errors.length,0);}finally{ctx.close();}}
 });
 test('CSS parses, content remains visible, brand fonts exist',()=>{
- const errors=[];for(const source of [css,fs.readFileSync(path.join(root,'assets/css/components/partner-logos.css'),'utf8'),...['navigation','content','forms'].map(name=>fs.readFileSync(path.join(root,`assets/css/components/${name}.css`),'utf8'))])csstree.parse(source,{onParseError:error=>errors.push(error.message)});assert.deepEqual(errors,[]);
+ const errors=[];for(const source of [css,fs.readFileSync(path.join(root,'assets/css/components/partner-logos.css'),'utf8'),...['navigation','content','forms','award-portal'].map(name=>fs.readFileSync(path.join(root,`assets/css/components/${name}.css`),'utf8'))])csstree.parse(source,{onParseError:error=>errors.push(error.message)});assert.deepEqual(errors,[]);
  assert(!/\.reveal[^{}]*\{[^{}]*opacity:\s*0/.test(css));
  const theme=JSON.parse(fs.readFileSync(path.join(root,'theme.json'),'utf8'));
  assert(theme.settings.typography.fontFamilies.some(f=>f.slug==='montserrat'));

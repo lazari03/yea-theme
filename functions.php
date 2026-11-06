@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define theme version
-define('YEA_VERSION', '1.3.54');
+define('YEA_VERSION', '1.3.55');
 
 require_once get_template_directory() . '/inc/partner-logos.php';
 
@@ -832,7 +832,21 @@ function yea_get_breadcrumb_items() {
  * Render breadcrumbs for templates and content.
  */
 function yea_breadcrumbs_shortcode() {
-    $items = yea_get_breadcrumb_items();
+    $items = array();
+
+    // Keep the more specific destination when adjacent levels share a label
+    // (for example, a Blog posts page followed by a Blog category).
+    foreach (yea_get_breadcrumb_items() as $item) {
+        $last_index = count($items) - 1;
+        if ($last_index >= 0 && 0 === strcasecmp(
+            trim(wp_strip_all_tags($items[$last_index]['label'])),
+            trim(wp_strip_all_tags($item['label']))
+        )) {
+            $items[$last_index] = $item;
+        } else {
+            $items[] = $item;
+        }
+    }
 
     if (count($items) < 2) {
         return '';

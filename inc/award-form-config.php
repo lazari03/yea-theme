@@ -11,6 +11,7 @@ add_action('rest_api_init', function () {
             'form' => array('type' => 'string'),
             'file_field' => array('type' => 'string'),
             'file_property' => array('type' => 'string'),
+            'field_properties' => array('type' => 'object'),
         ),
         'callback' => 'yea_award_form_config',
     ));
@@ -34,40 +35,46 @@ function yea_award_form_config($request) {
         if (!is_string($markup) || '' === trim($markup)) {
             return new WP_Error('yea_form_required', 'Nonempty form markup is required.', array('status' => 400));
         }
-        // Validate the file tag before making any remote schema change.
-        $field = sanitize_key((string) $request->get_param('file_field'));
-        $property = sanitize_text_field((string) $request->get_param('file_property'));
         $form->set_properties(array('form' => $markup));
-        if ($field || $property) {
-            $matching = array_filter($form->scan_form_tags(), function ($tag) use ($field) {
-                return $field === $tag->name && 'file' === $tag->basetype;
-            });
-            if (!$field || !$property || !$matching) {
-                return new WP_Error('yea_file_tag_required', 'A matching CF7 file field and Notion property name are required.', array('status' => 400));
+        $specs = (array) $request->get_param('field_properties');
+        if ($request->get_param('file_field') || $request->get_param('file_property')) {
+            $specs[(string) $request->get_param('file_field')] = array('name' => $request->get_param('file_property'), 'type' => 'files');
+        }
+        $tags = array();
+        foreach ($form->scan_form_tags() as $tag) { if ($tag->name) { $tags[$tag->name] = $tag; } }
+        $allowed = array('file' => array('files'), 'select' => array('select', 'multi_select', 'rich_text'), 'number' => array('number', 'rich_text'), 'text' => array('rich_text', 'title'), 'textarea' => array('rich_text'), 'email' => array('email', 'rich_text'), 'tel' => array('phone_number', 'rich_text'));
+        // Validate all requested mappings before any schema mutation.
+        foreach ($specs as $field => $spec) {
+            if (!is_array($spec) || empty($spec['name']) || empty($spec['type']) || !isset($tags[$field]) || !in_array($spec['type'], $allowed[$tags[$field]->basetype] ?? array(), true)) {
+                return new WP_Error('yea_mapping_invalid', 'A requested property is incompatible with its form field.', array('status' => 400));
             }
+            foreach ($columns as $candidate) {
+                if ($candidate->name === $spec['name'] && $candidate->type !== $spec['type']) {
+                    return new WP_Error('yea_property_type', 'An existing property has a different type; it will not be changed.', array('status' => 409));
+                }
+            }
+        }
+        foreach ($specs as $field => $spec) {
             $column = null;
             foreach ($columns as $candidate) {
-                if ($candidate->name === $property) { $column = $candidate; break; }
-            }
-            if ($column && 'files' !== $column->type) {
-                return new WP_Error('yea_property_type', 'The existing property is not a Files property; it will not be changed.', array('status' => 409));
+                if ($candidate->name === $spec['name']) { $column = $candidate; break; }
             }
             if (!$column) {
                 $service = \WPC_WPCF7_NTN\WPCF7_Notion_Service::get_instance();
                 $api = new class($service->get_api_key()) extends \WPC_WPCF7_NTN\API_Notion {
-                    public function add_files_property($database_id, $name) {
-                        return $this->request('databases/' . $database_id, array('properties' => array($name => array('files' => (object) array()))), 'PATCH');
+                    public function add_property($database_id, $name, $type) {
+                        return $this->request('databases/' . $database_id, array('properties' => array($name => array($type => (object) array()))), 'PATCH');
                     }
                 };
-                $result = $api->add_files_property($database, $property);
+                $result = $api->add_property($database, $spec['name'], $spec['type']);
                 if (is_wp_error($result)) {
-                    return new WP_Error('yea_property_failed', 'Notion could not add the file property. Existing form settings are unchanged.', array('status' => 502));
+                    return new WP_Error('yea_property_failed', 'Notion could not add a property. Existing form settings are unchanged.', array('status' => 502));
                 }
                 $columns = \WPC_WPCF7_NTN\Helpers\get_notion_databases_columns($database, true);
                 foreach ($columns as $candidate) {
-                    if ($candidate->name === $property && 'files' === $candidate->type) { $column = $candidate; break; }
+                    if ($candidate->name === $spec['name'] && $candidate->type === $spec['type']) { $column = $candidate; break; }
                 }
-                if (!$column) { return new WP_Error('yea_property_unconfirmed', 'The added property could not be confirmed. Retry after checking the database schema.', array('status' => 502)); }
+                if (!$column) { return new WP_Error('yea_property_unconfirmed', 'The added property could not be confirmed. Check the schema before retrying.', array('status' => 502)); }
             }
             $integration['mapping'][$field] = $column->id;
         }

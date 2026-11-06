@@ -1,6 +1,6 @@
 # YEA WordPress theme
 
-A block theme with reusable page patterns, responsive navigation, article layouts, partner logos and form styling. Version 1.3.58. The release fixes layout glitches; it does not migrate content or add translations.
+A block theme with reusable page patterns, responsive navigation, article layouts, partner logos and form styling. Version 1.3.60. The release fixes layout glitches; it does not migrate content or add translations.
 
 ## Install and update
 
@@ -98,3 +98,5 @@ Review `progress.md` for the release checklist. Restore the previous theme folde
 Assign the **YEA Award Submission Portal** template to registration/upload pages and wrap their content in `award-portal`. The portal stylesheet is shared with the editor. Native page content supplies the title, sidebar and navigation; existing CF7 and WPForms blocks supply the forms. No accounts or local-storage drafts are created.
 
 CF7 registration can opt into steps with a `.yea-award-form` wrapper and `.award-step` fieldsets, each with a unique `id`, `data-step-title`, and legend. Without enhancement all sections stay visible. The script checks required fields before advancing, preserves entered values while navigating, reveals CF7 server errors in their section, and shows `.award-success` only on `wpcf7mailsent`. CF7 still owns transport, validation and integrations; WPForms still owns project file uploads. Field names, file restrictions and integration mappings belong to form configuration, never the theme.
+
+The unified Award application includes document upload in its last CF7 step. The administrator-only `yea/v1/award-form/{id}` configuration endpoint reads the already configured Notion database schema and saves form markup without running the add-on's legacy editor hook that clears mappings on JSON saves. Explicit `field_properties` can reuse or add independent compatible properties; existing types and records are never rewritten. The existing Notion add-on saves application properties and the PDF link to one new record. Legacy entry pages can redirect to a canonical application through the editable integer `yea_award_portal_target` page meta.

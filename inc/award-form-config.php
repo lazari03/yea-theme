@@ -32,7 +32,11 @@ function yea_award_form_config($request) {
     $columns = \WPC_WPCF7_NTN\Helpers\get_notion_databases_columns($database, true);
     if (!$columns) { return new WP_Error('yea_schema_unavailable', 'Cannot read the configured Notion database schema.', array('status' => 502)); }
     if ('POST' === $request->get_method() && $request->get_param('diagnostic_test')) {
-        return yea_award_notion_delivery_check($form, $database, $columns);
+        try {
+            return yea_award_notion_delivery_check($form, $database, $columns);
+        } catch (\Throwable $error) {
+            return new WP_Error('yea_diagnostic_error', $error->getMessage(), array('status' => 500));
+        }
     }
     if ('POST' === $request->get_method()) {
         $markup = $request->get_param('form');
@@ -126,7 +130,8 @@ function yea_award_notion_delivery_check($form, $database, $columns) {
     $tags = array();
     foreach ($form->scan_form_tags() as $tag) { $tags[$tag->name] = $tag; }
     $values = array();
-    $temporary_pdf = wp_tempnam('award-delivery-check');
+    $temporary_pdf = tempnam(get_temp_dir(), 'yea_delivery_');
+    if (!$temporary_pdf) { return new WP_Error('yea_temp_failed', 'Could not create a temporary diagnostic file.', array('status' => 500)); }
     file_put_contents($temporary_pdf, "%PDF-1.4\n% Temporary integration fixture\n%%EOF\n");
     $file_urls = array();
     foreach ($mapped as $name => $field) {

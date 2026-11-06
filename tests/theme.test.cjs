@@ -89,8 +89,8 @@ test('rendered WordPress output, when provided, initializes without theme errors
 });
 
 test('anchor links retain native navigation and history',async()=>{
- const ctx=await boot();try{
-  const link=ctx.d.createElement('a');link.href='#main-content';ctx.d.body.append(link);
+ const ctx=await boot({html:markup().replace('<main id="main-content">','<a id="anchor-fixture" href="#main-content">Skip to content</a><main id="main-content">')});try{
+  const link=ctx.d.querySelector('#anchor-fixture');
   const event=new ctx.w.MouseEvent('click',{bubbles:true,cancelable:true});
   link.dispatchEvent(event);assert.equal(event.defaultPrevented,false);
  }finally{ctx.close();}

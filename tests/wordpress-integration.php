@@ -35,7 +35,19 @@ try {
     $block = new WP_Block(array('blockName' => 'core/post-template', 'attrs' => array()), array('query' => $query));
     $changed = new WP_Query(build_query_vars_from_query_block($block, 1));
     check_theme((int) $changed->found_posts === 2, 'Changing editor-selected terms must update the feed');
-    $markup = '<!-- wp:group {"className":"logo-wall-grid"} --><div class="wp-block-group logo-wall-grid"><!-- wp:group {"className":"logo-wall-card"} --><div class="wp-block-group logo-wall-card"><!-- wp:image --><figure class="wp-block-image"><img src="example.png" alt="Complete logo"/></figure><!-- /wp:image --></div><!-- /wp:group --></div><!-- /wp:group -->';
+    // A real attachment ensures restoring the old GD/DOM renderer would
+    // introduce a clipping wrapper and fail this regression.
+    if (function_exists('imagecreatetruecolor') && class_exists('DOMDocument')) {
+        $image = imagecreatetruecolor(40, 40);
+        imagefill($image, 0, 0, imagecolorallocate($image, 255, 255, 255));
+        imagefilledrectangle($image, 12, 15, 28, 25, imagecolorallocate($image, 0, 0, 0));
+        ob_start(); imagepng($image); $bytes = ob_get_clean(); imagedestroy($image);
+        $upload = wp_upload_bits('logo-fixture-' . uniqid() . '.png', null, $bytes);
+        check_theme(empty($upload['error']), 'Cannot write logo fixture');
+        $attachment_id = wp_insert_attachment(array('post_mime_type' => 'image/png', 'post_title' => 'Logo fixture', 'post_status' => 'inherit'), $upload['file']);
+        check_theme(!is_wp_error($attachment_id) && $attachment_id > 0, 'Cannot create logo attachment');
+    }
+    $markup = '<!-- wp:group {"className":"logo-wall-grid"} --><div class="wp-block-group logo-wall-grid"><!-- wp:group {"className":"logo-wall-card"} --><div class="wp-block-group logo-wall-card"><!-- wp:image --><figure class="wp-block-image"><img class="wp-image-' . (int) $attachment_id . '" src="example.png" alt="Complete logo"/></figure><!-- /wp:image --></div><!-- /wp:group --></div><!-- /wp:group -->';
     $rendered = do_blocks($markup);
     check_theme(strpos($rendered, 'alt="Complete logo"') !== false, 'Logo image must survive frontend block rendering');
     check_theme(strpos($rendered, 'yea-partner-logo-canvas') === false, 'Frontend must not add clipping windows absent from the editor');

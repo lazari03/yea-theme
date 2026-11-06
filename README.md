@@ -1,6 +1,6 @@
 # YEA WordPress theme
 
-A block theme with reusable page patterns, responsive navigation, article layouts, partner logos and form styling. Version 1.3.56. The release fixes layout glitches; it does not migrate content or add translations.
+A block theme with reusable page patterns, responsive navigation, article layouts, partner logos and form styling. Version 1.3.57. The release fixes layout glitches; it does not migrate content or add translations.
 
 ## Install and update
 
@@ -92,3 +92,9 @@ It verifies category unions, pagination beyond the first page, changing editor f
 Non-main branches and PRs validate without deploying. Main pushes validate PHP/JS/CSS/navigation before strict FTPS deployment. Configure `FTP_SERVER`, `FTP_USERNAME`, `FTP_PASSWORD` as GitHub repository secrets; the FTP account must be scoped to the intended theme folder. Tests, development dependencies and documentation are excluded from uploads.
 
 Review `progress.md` for the release checklist. Restore the previous theme folder to roll back code, and use WordPress revisions/backups to restore any separately edited header, menu or template. Do not reset all Site Editor overrides during an update.
+
+### Award submission portal
+
+Assign the **YEA Award Submission Portal** template to registration/upload pages and wrap their content in `award-portal`. The portal stylesheet is shared with the editor. Native page content supplies the title, sidebar and navigation; existing CF7 and WPForms blocks supply the forms. No accounts or local-storage drafts are created.
+
+CF7 registration can opt into steps with a `.yea-award-form` wrapper and `.award-step` fieldsets, each with a unique `id`, `data-step-title`, and legend. Without enhancement all sections stay visible. The script checks required fields before advancing, preserves entered values while navigating, reveals CF7 server errors in their section, and shows `.award-success` only on `wpcf7mailsent`. CF7 still owns transport, validation and integrations; WPForms still owns project file uploads. Field names, file restrictions and integration mappings belong to form configuration, never the theme.

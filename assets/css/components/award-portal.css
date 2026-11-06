@@ -1,0 +1,65 @@
+/* Award pages opt in; shared contact and registration forms stay unchanged. */
+.award-portal { --award-accent: var(--primary-dark, #256d7a); background: #f5f8fa; padding-block: clamp(28px, 5vw, 64px); color: var(--ink); }
+.award-portal__inner { width: min(1200px, calc(100% - 32px)); margin-inline: auto; }
+.award-portal__eyebrow { color: var(--award-accent); font-size: .8rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; margin: 0 0 12px; }
+.award-portal h1 { font-size: clamp(2.7rem, 6vw, 4.8rem); line-height: 1.05; margin: 0 0 16px; }
+.award-portal__lead { color: var(--muted); max-width: 64ch; line-height: 1.7; margin: 0; }
+.award-portal__nav { display: flex; flex-wrap: wrap; gap: 8px; margin-block: 28px 32px; padding: 6px; border: 1px solid var(--line); border-radius: 14px; background: #fff; width: fit-content; }
+.award-portal__nav a { padding: 12px 18px; color: var(--ink); border-radius: 9px; font-size: .9rem; font-weight: 650; text-decoration: none; }
+.award-portal__nav a[aria-current='page'] { background: var(--award-accent); color: #fff; }
+.award-layout { display: grid; grid-template-columns: minmax(210px, .75fr) minmax(0, 2fr); gap: clamp(20px, 3vw, 40px); align-items: start; }
+.award-layout > * { min-width: 0; }
+.award-sidebar { padding: 26px; border: 1px solid var(--line); border-radius: 16px; background: #eaf3f4; }
+.award-sidebar h2 { margin: 0 0 16px; font-size: 1.65rem; }
+.award-sidebar p, .award-sidebar li { font-size: .93rem; line-height: 1.65; }
+.award-sidebar ul, .award-sidebar ol { padding-left: 20px; margin: 12px 0 20px; }
+.award-sidebar li + li { margin-top: 12px; }
+.award-sidebar a { color: var(--award-accent); text-underline-offset: 3px; font-weight: 650; }
+.award-sidebar .award-note { border-top: 1px solid #ccdee1; padding-top: 18px; margin-top: 20px; }
+.award-panel { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: clamp(20px, 4vw, 44px); box-shadow: 0 8px 32px #10203406; }
+.award-panel > h2 { font-size: 2rem; margin: 0 0 10px; }
+.award-panel > p { color: var(--muted); line-height: 1.7; }
+.award-portal :is(.wpcf7, .wpforms-container) { margin: 24px 0 0; }
+.award-portal :is(.wpcf7 form, .wpforms-form) { display: block; }
+.award-portal .award-step { border: 0; padding: 0; margin: 0 0 32px; min-width: 0; }
+.award-step legend { padding: 0; margin: 0 0 10px; width: 100%; font: 400 1.8rem/1.2 'Bebas Neue', Impact, sans-serif; color: var(--ink); }
+.award-step__intro { color: var(--muted); font-size: .94rem; line-height: 1.65; margin: 0 0 24px; }
+.award-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.award-fields > * { margin: 0; min-width: 0; }
+.award-field--wide { grid-column: 1 / -1; }
+.award-portal label, .award-portal .wpforms-field-label { display: block; font-size: .94rem; font-weight: 650; line-height: 1.5; margin-bottom: 8px; }
+.award-portal .wpcf7 label > .wpcf7-form-control-wrap { margin-top: 8px; }
+.award-portal .award-help { display: block; font-size: .83rem; color: var(--muted); line-height: 1.6; margin-top: 8px; }
+.award-portal .wpcf7 :is(input:not([type=submit]):not([type=hidden]):not([type=checkbox]):not([type=radio]), select, textarea),
+.award-portal .wpforms-container .wpforms-form :is(input:not([type=hidden]):not([type=checkbox]):not([type=radio]):not(.dropzone-input), select, textarea) { width: 100%; max-width: 100%; min-height: 50px; padding: 12px 14px; border: 1px solid #b8c7cf; border-radius: 10px; background: #fff; font: inherit; color: var(--ink); box-sizing: border-box; }
+.award-portal .wpcf7 textarea { min-height: 130px; }
+.award-portal :is(input, textarea, select, button, a):focus-visible { outline: 3px solid var(--award-accent); outline-offset: 3px; }
+.award-portal .award-tip { padding: 14px 16px; background: #f1f7f8; border-left: 3px solid var(--award-accent); font-size: .88rem; line-height: 1.65; margin: 16px 0 24px; }
+.award-portal .award-submit { border-top: 1px solid var(--line); padding-top: 24px; }
+.award-portal :is(.wpcf7-submit, button.award-next, .wpforms-container .wpforms-submit) { background: var(--award-accent); color: #fff; border: 0; border-radius: 10px; padding: 14px 24px; min-height: 50px; font: 650 .95rem/1.4 Montserrat, sans-serif; cursor: pointer; }
+.award-portal :is(.wpcf7-submit, button.award-next, .wpforms-submit):hover { background: var(--ink); transform: none; }
+.award-portal .award-progress { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 0 24px; margin: 0 0 28px; border-bottom: 1px solid var(--line); list-style: none; }
+.award-progress li { flex: 1 1 110px; margin: 0; }
+.award-progress button { width: 100%; padding: 10px 8px; border: 1px solid var(--line); border-radius: 8px; background: #f7f9fa; color: var(--muted); font: 600 .8rem/1.4 Montserrat, sans-serif; cursor: pointer; text-align: left; }
+.award-progress button[aria-current=step] { border-color: var(--award-accent); background: #eaf3f4; color: var(--award-accent); }
+.award-portal .award-controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; border-top: 1px solid var(--line); padding-top: 24px; margin-top: 24px; }
+.award-portal .award-back { border: 1px solid #b8c7cf; border-radius: 10px; padding: 13px 20px; background: #fff; color: var(--ink); min-height: 50px; font: 600 .9rem/1.4 Montserrat, sans-serif; cursor: pointer; }
+.award-portal [hidden] { display: none !important; }
+.award-portal .award-step-error, .award-portal .wpcf7-not-valid-tip { color: #a51e2c; font-size: .9rem; line-height: 1.6; }
+.award-portal [aria-invalid=true] { border-color: #a51e2c !important; }
+.award-portal .award-success { border: 1px solid #99c7bb; border-radius: 12px; background: #eff9f4; padding: 24px; margin-top: 24px; }
+.award-success h3 { margin-top: 0; }
+.award-portal .wpforms-container .wpforms-field { padding: 0 0 24px; border: 0; }
+.award-portal .wpforms-container :is(.wpforms-field-medium, .wpforms-field-row) { max-width: 100%; }
+.award-portal .wpforms-container .wpforms-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.award-portal .wpforms-container .wpforms-field-row-block { width: 100%; float: none; margin: 0; }
+.award-portal .wpforms-container .wpforms-field-file-upload { background: #f4f8fa; border: 1px solid var(--line); border-radius: 12px; padding: 20px; margin-bottom: 24px; }
+.award-portal .wpforms-container .wpforms-uploader { border: 2px dashed #93b3bd; border-radius: 10px; background: #fff; min-height: 170px; padding: 20px; }
+.award-portal .wpforms-container .wpforms-uploader .dz-message { font-size: .95rem; line-height: 1.6; margin: 0; }
+.award-portal .wpforms-container .wpforms-field-description { color: var(--muted); font-size: .85rem; line-height: 1.65; margin-top: 10px; }
+@media(max-width: 760px) { .award-layout { grid-template-columns: 1fr; } .award-sidebar { order: 1; } .award-fields { grid-template-columns: 1fr; } .award-portal__nav { width: 100%; } .award-portal__nav a { flex: 1 1 auto; text-align: center; padding-inline: 10px; } .award-portal__inner { width: calc(100% - 24px); } }
+@media(prefers-reduced-motion: reduce) { .award-portal * { scroll-behavior: auto; } }
+.award-portal h1 { max-width: none; animation: none; letter-spacing: .01em; color: var(--ink); }
+.award-portal .wpcf7 .hidden-fields-container { display: none; }
+.award-portal .wpforms-container fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+.award-portal :is(input, select, textarea) { font-weight: 400; }

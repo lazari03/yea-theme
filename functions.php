@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define theme version
-define('YEA_VERSION', '1.3.56');
+define('YEA_VERSION', '1.3.57');
 
 /**
  * Theme Setup
@@ -26,7 +26,7 @@ function yea_theme_setup() {
     add_theme_support('wp-block-styles');
     add_theme_support('align-wide');
     add_theme_support('editor-styles');
-    add_editor_style(array('style.css', 'editor-style.css', 'assets/css/components/partner-logos.css', 'assets/css/components/navigation.css', 'assets/css/components/content.css', 'assets/css/components/forms.css'));
+    add_editor_style(array('style.css', 'editor-style.css', 'assets/css/components/partner-logos.css', 'assets/css/components/navigation.css', 'assets/css/components/content.css', 'assets/css/components/forms.css', 'assets/css/components/award-portal.css'));
     add_theme_support('custom-logo', array(
         'height'      => 100,
         'width'       => 300,
@@ -68,6 +68,11 @@ function yea_enqueue_scripts() {
 
     wp_enqueue_style('yea-content', get_template_directory_uri() . '/assets/css/components/content.css', array('yea-style'), YEA_VERSION);
     wp_enqueue_style('yea-forms', get_template_directory_uri() . '/assets/css/components/forms.css', array('yea-style'), YEA_VERSION);
+
+    if (is_page_template(array('page-award-portal', 'page-award-portal.html'))) {
+        wp_enqueue_style('yea-award-portal', get_template_directory_uri() . '/assets/css/components/award-portal.css', array('yea-forms'), YEA_VERSION);
+        wp_enqueue_script('yea-award-portal', get_template_directory_uri() . '/js/award-portal.js', array('yea-theme'), YEA_VERSION, true);
+    }
 
     // Theme scripts
     wp_enqueue_script('yea-theme', get_template_directory_uri() . '/js/theme.js', array(), YEA_VERSION, true);

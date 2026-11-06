@@ -206,6 +206,13 @@
       "postTypes": [
         "page"
       ]
+    },
+    {
+      "name": "page-award-portal",
+      "title": "YEA Award Submission Portal",
+      "postTypes": [
+        "page"
+      ]
     }
   ]
 }

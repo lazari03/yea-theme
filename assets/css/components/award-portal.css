@@ -67,3 +67,8 @@
 .award-portal .award-next { margin-inline-start: auto; }
 /* Contain fixed-width CAPTCHA widgets on narrow phones without hiding them. */
 .award-portal .cf7-cf-turnstile { max-inline-size: 100%; overflow-x: auto; padding-block-end: 16px; }
+
+.award-file-drop { padding: clamp(18px, 3vw, 28px); border: 2px dashed #93b3bd; border-radius: 14px; background: #f3f8f9; }
+.award-file-drop input[type=file] { padding: 12px; background: #fff; cursor: pointer; }
+.award-file-drop input[type=file]::file-selector-button { background: var(--award-accent); border: 0; border-radius: 6px; color: #fff; padding: 10px 14px; margin-right: 12px; cursor: pointer; }
+.award-file-meta { font-size: .9rem; color: var(--award-accent); overflow-wrap: anywhere; }

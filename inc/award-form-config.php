@@ -141,7 +141,7 @@ function yea_award_notion_delivery_check($form, $database, $columns) {
         );
     }
     $fields = \WPC_WPCF7_NTN\Helpers\prepare_fields_for_notion($values, $database);
-    $api = \WPC_WPCF7_NTN\wpconnect_wpcf7_notion_get_api();
+    $api = \wpconnect_wpcf7_notion_get_api();
     $result = $api->add_database_row($database, $fields);
     if (is_wp_error($result)) {
         return new WP_Error('yea_delivery_failed', 'Notion rejected the delivery check.', array('status' => 502, 'notion_error' => get_transient('yea_award_notion_last_error')));

@@ -12,6 +12,7 @@ add_action('rest_api_init', function () {
             'file_field' => array('type' => 'string'),
             'file_property' => array('type' => 'string'),
             'field_properties' => array('type' => 'object'),
+            'diagnostic_test' => array('type' => 'boolean'),
         ),
         'callback' => 'yea_award_form_config',
     ));
@@ -30,6 +31,9 @@ function yea_award_form_config($request) {
     $database = $integration['database_selected'];
     $columns = \WPC_WPCF7_NTN\Helpers\get_notion_databases_columns($database, true);
     if (!$columns) { return new WP_Error('yea_schema_unavailable', 'Cannot read the configured Notion database schema.', array('status' => 502)); }
+    if ('POST' === $request->get_method() && $request->get_param('diagnostic_test')) {
+        return yea_award_notion_delivery_check($form, $database, $columns);
+    }
     if ('POST' === $request->get_method()) {
         $markup = $request->get_param('form');
         if (!is_string($markup) || '' === trim($markup)) {
@@ -83,7 +87,7 @@ function yea_award_form_config($request) {
         $form->set_properties(array('wpc_notion' => $integration));
         if (!$form->save()) { return new WP_Error('yea_save_failed', 'The form could not be saved.', array('status' => 500)); }
     }
-    return array('id' => $form->id(), 'database_id' => $database, 'columns' => array_values($columns), 'mapping' => $integration['mapping']);
+    return array('id' => $form->id(), 'database_id' => $database, 'columns' => array_values($columns), 'mapping' => $integration['mapping'], 'last_delivery_error' => get_transient('yea_award_notion_last_error') ?: null);
 }
 
 // Legacy entry points may point to one canonical application, without duplicate forms.
@@ -103,3 +107,49 @@ add_action('template_redirect', function () {
         exit;
     }
 });
+
+/** Keep only API error details; never store tokens, request payloads or uploaded files. */
+add_action('add-on-cf7-for-notion/notion-api/response', function ($route, $pretty, $response) {
+    if ('pages' === $route && is_wp_error($response)) {
+        set_transient('yea_award_notion_last_error', array(
+            'time' => gmdate('c'), 'code' => isset($pretty->code) ? $pretty->code : $response->get_error_code(),
+            'message' => isset($pretty->message) ? $pretty->message : $response->get_error_message(),
+        ), DAY_IN_SECONDS);
+    }
+}, 10, 3);
+
+/** Administrator-only delivery check: synthetic values, no CF7 submit or email. */
+function yea_award_notion_delivery_check($form, $database, $columns) {
+    $mapper = \WPC_WPCF7_NTN\WPCF7_Field_Mapper::get_instance();
+    $mapped = \WPC_WPCF7_NTN\Helpers\get_mapped_tags_from_contact_form($form, $columns);
+    $mapped = $mapper->filter_mapped_tags($mapped);
+    $tags = array();
+    foreach ($form->scan_form_tags() as $tag) { $tags[$tag->name] = $tag; }
+    $values = array();
+    foreach ($mapped as $name => $field) {
+        $value = 'Temporary integration check';
+        if ('title' === $field['notion_field_type']) { $value = 'YEA delivery check ' . gmdate('Y-m-d H:i:s') . ' (temporary)'; }
+        if ('email' === $field['type']) { $value = 'integration-check@example.test'; }
+        if ('tel' === $field['type']) { $value = '+355000000000'; }
+        if ('select' === $field['type']) { $value = array($tags[$name]->values[0]); }
+        if ('file' === $field['type']) {
+            $value = array(home_url('/wp-content/uploads/2024/11/YEA-Awards-2025-Vol.-9_Info.pdf'));
+        }
+        $values[$field['notion_field_id']] = (object) array(
+            'field_value' => $mapper->get_formatted_field_value($field['type'], $field['notion_field_type'], $value),
+            'field_type' => $field['notion_field_type'], 'column_id' => $field['notion_field_id'],
+        );
+    }
+    $fields = \WPC_WPCF7_NTN\Helpers\prepare_fields_for_notion($values, $database);
+    $api = \WPC_WPCF7_NTN\wpconnect_wpcf7_notion_get_api();
+    $result = $api->add_database_row($database, $fields);
+    if (is_wp_error($result)) {
+        return new WP_Error('yea_delivery_failed', 'Notion rejected the delivery check.', array('status' => 502, 'notion_error' => get_transient('yea_award_notion_last_error')));
+    }
+    $service = \WPC_WPCF7_NTN\WPCF7_Notion_Service::get_instance();
+    $cleanup = new class($service->get_api_key()) extends \WPC_WPCF7_NTN\API_Notion {
+        public function archive_check($id) { return $this->request('pages/' . $id, array('archived' => true), 'PATCH'); }
+    };
+    $archived = $cleanup->archive_check($result->id);
+    return array('delivered' => true, 'test_record_id' => $result->id, 'archived' => !is_wp_error($archived), 'property_count' => count($fields));
+}

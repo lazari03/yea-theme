@@ -81,3 +81,4 @@
 .award-delivery-files > button { margin-block: 24px 12px; }
 .award-portal button:disabled { opacity: .65; cursor: wait; }
 .award-selected-files { padding-left: 20px; overflow-wrap: anywhere; }
+.award-delivery-files input[type=file] { box-sizing: border-box; inline-size: 100%; max-inline-size: 100%; min-inline-size: 0; }

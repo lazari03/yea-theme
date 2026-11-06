@@ -73,9 +73,25 @@
                 const first = fields.map(function (item) { return Array.from(form.elements).find(function (field) { return field.name === item.field; }); }).find(Boolean);
                 if (first) { const index = steps.indexOf(first.closest('.award-step')); if (index >= 0) show(index, false); first.focus(); }
             });
-            wrapper.addEventListener('wpcf7mailsent', function () {
+            wrapper.addEventListener('wpcf7mailsent', function (event) {
                 const panel = document.querySelector('.award-success');
-                if (panel) { panel.hidden = false; panel.tabIndex = -1; panel.focus(); }
+                if (panel) {
+                    const response = event.detail && event.detail.apiResponse;
+                    if (response && response.registration_code) {
+                        const code = panel.querySelector('.award-registration-code');
+                        if (code) code.textContent = response.registration_code;
+                        const project = panel.querySelector('.award-registered-project');
+                        if (project) project.textContent = response.project_name || '';
+                        const email = panel.querySelector('.award-email-status');
+                        if (email) email.textContent = response.email_confirmation === false ? 'Emaili nuk u konfirmua. Ruajeni kodin nga kjo faqe.' : 'Kodi ju dërgohet edhe në emailin e koordinatorit.';
+                        const download = panel.querySelector('.award-save-code');
+                        if (download) download.onclick = function () {
+                            const blob = new Blob(['YEA! Awards\nProjekti: ' + (response.project_name || '') + '\nKodi: ' + response.registration_code + '\nDorëzimi: ' + (response.delivery_url || '')], {type: 'text/plain;charset=utf-8'});
+                            const url = URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url; link.download = 'YEA-registration-code.txt'; link.click(); setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+                        };
+                    }
+                    panel.hidden = false; panel.tabIndex = -1; panel.focus();
+                }
                 // CF7 resets the original form after this event; never simulate a success.
                 form.hidden = true;
             });
@@ -83,4 +99,68 @@
         });
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+
+(function () {
+    'use strict';
+    async function initDelivery() {
+        const portal = document.querySelector('.award-delivery');
+        if (!portal || !window.yeaAward) return;
+        const root = window.yeaAward.deliveryRoot;
+        const status = portal.querySelector('.award-delivery-status');
+        const errors = portal.querySelector('.award-delivery-error');
+        const codeForm = portal.querySelector('.award-code-form');
+        const unlocked = portal.querySelector('.award-unlocked');
+        const fileForm = portal.querySelector('.award-delivery-files');
+        let token = null;
+        async function request(path, options) {
+            const response = await fetch(root + path, Object.assign({cache: 'no-store', credentials: 'omit'}, options));
+            const data = await response.json();
+            if (!response.ok) { const error = new Error(data.message || 'Lidhja nuk u konfirmua. Provoni përsëri.'); error.status = response.status; throw error; }
+            return data;
+        }
+        try {
+            const result = await request('status');
+            status.textContent = result.open ? 'Dorëzimi është i hapur. Vendosni kodin e regjistrimit.' : 'Dorëzimi i projekteve nuk është hapur ende. Ruajeni kodin tuaj; do ta përdorni këtu kur të hapet.';
+            codeForm.hidden = !result.open;
+        } catch (error) { status.textContent = 'Statusi nuk u kontrollua. Rifreskoni faqen për të provuar përsëri.'; }
+        codeForm.addEventListener('submit', async function (event) {
+            event.preventDefault(); errors.textContent = '';
+            const button = codeForm.querySelector('button'); button.disabled = true;
+            try {
+                const result = await request('unlock', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({code: codeForm.elements.code.value})});
+                token = result.token; codeForm.reset(); codeForm.hidden = true; unlocked.hidden = false;
+                const welcome = portal.querySelector('.award-project-welcome'); welcome.textContent = 'Mirë se vini, “' + result.project + '”.'; welcome.focus();
+                status.textContent = 'Projekti u verifikua. Tani mund të dorëzoni dokumentet.';
+            } catch (error) { errors.textContent = error.message; }
+            finally { button.disabled = false; }
+        });
+        const documents = fileForm.querySelector('input[type=file]');
+        documents.addEventListener('change', function () {
+            const list = portal.querySelector('.award-selected-files'); list.replaceChildren();
+            Array.from(documents.files).forEach(function (file) { const li = document.createElement('li'); li.textContent = file.name + ' · ' + (file.size / 1048576).toFixed(1) + ' MB'; list.append(li); });
+        });
+        fileForm.addEventListener('submit', async function (event) {
+            event.preventDefault(); errors.textContent = '';
+            const files = Array.from(documents.files);
+            if (!files.length || files.length > 2 || files.some(function (file) { return !/\.(pptx?|pdf)$/i.test(file.name) || file.size < 1 || file.size > 20 * 1048576; })) {
+                errors.textContent = 'Zgjidhni një ose dy dokumente PDF / PowerPoint, deri në 20 MB secili.'; documents.focus(); return;
+            }
+            const button = fileForm.querySelector('button'); button.disabled = true; button.textContent = 'Po dërgohen dokumentet…';
+            try {
+                const result = await request('files', {method: 'POST', headers: {'X-YEA-Delivery-Token': token}, body: new FormData(fileForm)});
+                if (!result.received) throw new Error('Dorëzimi nuk u konfirmua. Provoni përsëri.');
+                unlocked.hidden = true; status.textContent = ''; fileForm.reset();
+                const success = portal.querySelector('.award-delivery-success'); success.hidden = false;
+                success.querySelector('.award-delivery-receipt').textContent = 'Referenca e dorëzimit: ' + result.receipt; success.focus();
+            } catch (error) {
+                errors.textContent = error.message;
+                if (error.status === 401 || error.status === 423) {
+                    token = null; unlocked.hidden = true; codeForm.hidden = error.status === 423;
+                    status.textContent = error.status === 423 ? 'Dorëzimi është mbyllur.' : 'Vendosni përsëri kodin për të vazhduar.';
+                }
+            } finally { button.disabled = false; button.textContent = 'Dërgo dokumentet'; }
+        });
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initDelivery); else initDelivery();
 })();

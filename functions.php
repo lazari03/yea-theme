@@ -10,9 +10,10 @@ if (!defined('ABSPATH')) {
 }
 
 // Define theme version
-define('YEA_VERSION', '1.3.61');
+define('YEA_VERSION', '1.3.62');
 
 require_once get_template_directory() . '/inc/award-form-config.php';
+require_once get_template_directory() . '/inc/award-delivery.php';
 
 /**
  * Theme Setup
@@ -74,6 +75,7 @@ function yea_enqueue_scripts() {
     if (is_page_template(array('page-award-portal', 'page-award-portal.html'))) {
         wp_enqueue_style('yea-award-portal', get_template_directory_uri() . '/assets/css/components/award-portal.css', array('yea-forms'), YEA_VERSION);
         wp_enqueue_script('yea-award-portal', get_template_directory_uri() . '/js/award-portal.js', array('yea-theme'), YEA_VERSION, true);
+        wp_localize_script('yea-award-portal', 'yeaAward', array('deliveryRoot' => esc_url_raw(rest_url('yea/v1/award-delivery/'))));
     }
 
     // Theme scripts

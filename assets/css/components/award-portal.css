@@ -72,3 +72,13 @@
 .award-file-drop input[type=file] { padding: 12px; background: #fff; cursor: pointer; }
 .award-file-drop input[type=file]::file-selector-button { background: var(--award-accent); border: 0; border-radius: 6px; color: #fff; padding: 10px 14px; margin-right: 12px; cursor: pointer; }
 .award-file-meta { font-size: .9rem; color: var(--award-accent); overflow-wrap: anywhere; }
+.award-registration-code { display: block; padding: 20px; margin-block: 16px; background: #fff; border: 1px solid #99c7bb; border-radius: 10px; font: 700 clamp(.95rem, 2vw, 1.35rem)/1.7 monospace; letter-spacing: .02em; overflow-wrap: anywhere; user-select: all; }
+.award-code-form { display: grid; gap: 16px; }
+.award-code-form input { box-sizing: border-box; width: 100%; padding: 15px; border: 1px solid #b8c7cf; border-radius: 10px; font: 1rem/1.5 monospace; }
+.award-delivery-status { padding: 16px; background: #eef6f7; border-radius: 10px; line-height: 1.7; }
+.award-delivery-error { color: #a51e2c; line-height: 1.65; }
+.award-unlocked h3 { font-size: 1.8rem; }
+.award-delivery-files > button { margin-block: 24px 12px; }
+.award-portal button:disabled { opacity: .65; cursor: wait; }
+.award-selected-files { padding-left: 20px; overflow-wrap: anywhere; }
+.award-delivery-files input[type=file] { box-sizing: border-box; inline-size: 100%; max-inline-size: 100%; min-inline-size: 0; }

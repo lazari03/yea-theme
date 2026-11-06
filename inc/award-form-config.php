@@ -13,6 +13,8 @@ add_action('rest_api_init', function () {
             'file_property' => array('type' => 'string'),
             'field_properties' => array('type' => 'object'),
             'diagnostic_test' => array('type' => 'boolean'),
+            'confirmation_email' => array('type' => 'boolean'),
+            'workflow_test' => array('type' => 'boolean'),
         ),
         'callback' => 'yea_award_form_config',
     ));
@@ -31,6 +33,9 @@ function yea_award_form_config($request) {
     $database = $integration['database_selected'];
     $columns = \WPC_WPCF7_NTN\Helpers\get_notion_databases_columns($database, true);
     if (!$columns) { return new WP_Error('yea_schema_unavailable', 'Cannot read the configured Notion database schema.', array('status' => 502)); }
+    if ('POST' === $request->get_method() && $request->get_param('workflow_test')) {
+        return yea_award_workflow_check($form, $database, $columns);
+    }
     if ('POST' === $request->get_method() && $request->get_param('diagnostic_test')) {
         try {
             return yea_award_notion_delivery_check($form, $database, $columns);
@@ -50,7 +55,7 @@ function yea_award_form_config($request) {
         }
         $tags = array();
         foreach ($form->scan_form_tags() as $tag) { if ($tag->name) { $tags[$tag->name] = $tag; } }
-        $allowed = array('file' => array('files'), 'select' => array('select', 'multi_select', 'rich_text'), 'number' => array('number', 'rich_text'), 'text' => array('rich_text', 'title'), 'textarea' => array('rich_text'), 'email' => array('email', 'rich_text'), 'tel' => array('phone_number', 'rich_text'));
+        $allowed = array('hidden' => array('rich_text', 'title'), 'file' => array('files'), 'select' => array('select', 'multi_select', 'rich_text'), 'number' => array('number', 'rich_text'), 'text' => array('rich_text', 'title'), 'textarea' => array('rich_text'), 'email' => array('email', 'rich_text'), 'tel' => array('phone_number', 'rich_text'));
         // Validate all requested mappings before any schema mutation.
         foreach ($specs as $field => $spec) {
             if (!is_array($spec) || empty($spec['name']) || empty($spec['type']) || !isset($tags[$field]) || !in_array($spec['type'], $allowed[$tags[$field]->basetype] ?? array(), true)) {
@@ -89,6 +94,15 @@ function yea_award_form_config($request) {
         // Save properties directly. The add-on's legacy editor save hook reads
         // $_POST and clears mappings during JSON REST saves; do not invoke it.
         $form->set_properties(array('wpc_notion' => $integration));
+        if ($request->get_param('confirmation_email')) {
+            $primary = $form->prop('mail');
+            $form->set_properties(array('mail_2' => array(
+                'active' => true, 'subject' => 'YEA! Awards — Kodi i regjistrimit [registration-code]',
+                'sender' => $primary['sender'], 'recipient' => '[coordinator-email]',
+                'body' => "Përshëndetje [coordinator-name],\n\nRegjistrimi i projektit “[project-title]” u ruajt.\n\nKodi juaj i regjistrimit: [registration-code]\n\nRuajeni këtë kod. Kur të hapet dorëzimi, përdoreni për të ngarkuar PowerPoint dhe PDF në:\n" . yea_award_delivery_url() . "\n\nEkipi YEA!",
+                'additional_headers' => 'Reply-To: [_site_admin_email]', 'attachments' => '', 'use_html' => false, 'exclude_blank' => true,
+            )));
+        }
         if (!$form->save()) { return new WP_Error('yea_save_failed', 'The form could not be saved.', array('status' => 500)); }
     }
     return array('id' => $form->id(), 'database_id' => $database, 'columns' => array_values($columns), 'mapping' => $integration['mapping'], 'last_delivery_error' => get_transient('yea_award_notion_last_error') ?: null);

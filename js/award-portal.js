@@ -6,6 +6,14 @@
             const steps = Array.from(form.querySelectorAll('.award-step'));
             if (steps.length < 2 || form.dataset.awardReady) return;
             let current = 0;
+            form.querySelectorAll('input[type=file]').forEach(function (input) {
+                const status = document.createElement('p'); status.className = 'award-file-meta'; status.setAttribute('aria-live', 'polite');
+                input.after(status);
+                input.addEventListener('change', function () {
+                    const file = input.files[0];
+                    status.textContent = file ? file.name + ' · ' + (file.size / 1048576).toFixed(1) + ' MB' : '';
+                });
+            });
             const progress = document.createElement('ol');
             progress.className = 'award-progress';
             progress.setAttribute('aria-label', 'Hapat e regjistrimit');
@@ -32,7 +40,9 @@
                 steps[index].querySelectorAll('input:not([type=hidden]):not([type=submit]), select, textarea').forEach(function (field) {
                     const required = field.required || field.getAttribute('aria-required') === 'true';
                     const missing = required && !field.value.trim();
-                    const bad = missing || (field.value && !field.validity.valid);
+                    const file = field.type === 'file' && field.files[0];
+                    const badFile = file && (!/\.pdf$/i.test(file.name) || file.size > 10 * 1024 * 1024);
+                    const bad = missing || badFile || (field.value && !field.validity.valid);
                     field.setAttribute('aria-invalid', String(Boolean(bad)));
                     if (bad && !invalid) invalid = field;
                 });
@@ -67,7 +77,7 @@
                 const panel = document.querySelector('.award-success');
                 if (panel) { panel.hidden = false; panel.tabIndex = -1; panel.focus(); }
                 // CF7 resets the original form after this event; never simulate a success.
-                show(0, false);
+                form.hidden = true;
             });
             form.dataset.awardReady = 'true'; show(0, false);
         });

@@ -78,3 +78,21 @@ function yea_award_form_config($request) {
     }
     return array('id' => $form->id(), 'database_id' => $database, 'columns' => array_values($columns), 'mapping' => $integration['mapping']);
 }
+
+// Legacy entry points may point to one canonical application, without duplicate forms.
+add_action('init', function () {
+    register_post_meta('page', 'yea_award_portal_target', array(
+        'type' => 'integer', 'single' => true, 'show_in_rest' => true,
+        'sanitize_callback' => 'absint',
+        'auth_callback' => function ($allowed, $key, $post_id) { return current_user_can('edit_post', $post_id); },
+    ));
+});
+add_action('template_redirect', function () {
+    if (!is_page() || is_preview()) { return; }
+    $source = get_queried_object_id();
+    $target = (int) get_post_meta($source, 'yea_award_portal_target', true);
+    if ($target && $source !== $target && 'page' === get_post_type($target) && 'publish' === get_post_status($target) && !(int) get_post_meta($target, 'yea_award_portal_target', true)) {
+        wp_safe_redirect(get_permalink($target), 302);
+        exit;
+    }
+});

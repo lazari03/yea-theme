@@ -1,7 +1,7 @@
 /* Editable Gutenberg logo wall. Partners remain content, never theme data. */
 .logo-wall-grid {
   --partner-column-min: 18rem;
-  --partner-logo-size: clamp(9rem, 15vw, 12rem);
+  --partner-logo-size: 17rem;
   --partner-card-height: 12rem;
   --partner-gap: clamp(1rem, 2vw, 1.5rem);
   display: grid;
@@ -39,10 +39,10 @@
    those only inside this component; never crop or distort a partner's mark. */
 .logo-wall-card img {
   display: block;
-  width: min(100%, var(--partner-logo-size, 12rem)) !important;
-  height: auto !important;
+  width: min(100%, var(--partner-logo-size, 17rem)) !important;
+  height: 9rem !important;
   max-width: 100%;
-  max-height: none;
+  max-height: 9rem;
   aspect-ratio: auto !important;
   object-fit: contain !important;
   border-radius: 0;
@@ -58,21 +58,19 @@
   overflow-wrap: anywhere;
 }
 
-/* The window is based on visible pixel bounds, not a partner-name lookup.
-   It hides empty source-canvas margins while preserving every mark's ratio. */
+/* Compatibility with cached markup from earlier theme releases: show the whole
+   image in normal flow rather than retaining an optical clipping window. */
 .logo-wall-card .yea-partner-logo-canvas {
-  display: block;
-  position: relative;
-  width: min(100%, 17rem, calc(7rem * var(--logo-ratio)));
-  aspect-ratio: var(--logo-ratio);
-  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: auto;
+  overflow: visible;
 }
 .logo-wall-card .yea-partner-logo-canvas img {
-  position: absolute;
-  width: var(--logo-image-width) !important;
-  max-width: none;
-  height: auto !important;
-  left: var(--logo-offset-x);
-  top: var(--logo-offset-y);
+  position: static;
+  left: auto;
+  top: auto;
 }
 .logo-wall-card img { margin: 0; }

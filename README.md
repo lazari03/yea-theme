@@ -1,6 +1,6 @@
 # YEA WordPress theme
 
-A block theme with reusable page patterns, responsive navigation, article layouts, partner logos and form styling. Version 1.3.57. The release fixes layout glitches; it does not migrate content or add translations.
+A block theme with reusable page patterns, responsive navigation, article layouts, partner logos and form styling. Version 1.3.58. The release fixes layout glitches; it does not migrate content or add translations.
 
 ## Install and update
 

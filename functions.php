@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define theme version
-define('YEA_VERSION', '1.3.62');
+define('YEA_VERSION', '1.3.63');
 
 require_once get_template_directory() . '/inc/award-form-config.php';
 require_once get_template_directory() . '/inc/award-delivery.php';
@@ -79,6 +79,7 @@ function yea_enqueue_scripts() {
     }
 
     // Theme scripts
+    wp_enqueue_script('yea-editorial', get_template_directory_uri() . '/js/editorial.js', array(), YEA_VERSION, true);
     wp_enqueue_script('yea-theme', get_template_directory_uri() . '/js/theme.js', array(), YEA_VERSION, true);
     
     // Pass theme options to JavaScript

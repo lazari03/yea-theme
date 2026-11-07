@@ -313,8 +313,7 @@
                 drawer.setAttribute('hidden', 'hidden');
                 drawer.setAttribute('aria-hidden', 'true');
                 drawer.id = 'yea-mobile-navigation';
-                drawer.setAttribute('role', 'dialog');
-                drawer.setAttribute('aria-modal', 'true');
+                drawer.setAttribute('role', 'navigation');
                 drawer.setAttribute('aria-label', labels.menuLabel || 'Navigation');
                 drawer.innerHTML = '<div class="container yea-mobile-drawer__inner"></div>';
                 header.appendChild(drawer);
@@ -391,13 +390,6 @@
             }
 
             drawerInner.innerHTML = '';
-            const closeButton = document.createElement('button');
-            closeButton.type = 'button';
-            closeButton.className = 'yea-menu-close';
-            closeButton.textContent = labels.closeMenu || 'Close menu';
-            closeButton.addEventListener('click', function() { setMenuOpen(false); });
-            drawerInner.appendChild(closeButton);
-
             if (desktopMenu) {
                 const clonedMenu = desktopMenu.cloneNode(true);
                 clonedMenu.className = desktopMenu.className;
@@ -448,14 +440,14 @@
                         element.inert = true;
                         return {element: element, previous: previous};
                     });
-                drawer.querySelector('.yea-menu-close').focus();
+                openButton.focus();
             } else if (!shouldOpen && wasOpen) {
                 inertRegions.forEach(function(region) { region.element.inert = region.previous; });
                 scrollLocks.forEach(function(lock) { if (!lock.existed) lock.element.classList.remove('has-modal-open'); });
                 inertRegions = [];
                 scrollLocks = [];
                 if (restoreFocus !== false && returnFocus && returnFocus.isConnected) returnFocus.focus();
-                else if (drawer.contains(document.activeElement)) {
+                else if (drawer.contains(document.activeElement) || document.activeElement === openButton) {
                     const desktopLink = getMenuLinks(navigation)[0];
                     if (desktopLink) desktopLink.focus();
                 }
@@ -502,7 +494,7 @@
                 setMenuOpen(false);
             }
             if (event.key === 'Tab') {
-                const items = Array.from(drawer.querySelectorAll('a[href], button:not([disabled]), [tabindex="0"]'))
+                const items = [openButton].concat(Array.from(drawer.querySelectorAll('a[href], button:not([disabled]), [tabindex="0"]')))
                     .filter(function(element) { return element.getClientRects().length > 0; });
                 const first = items[0];
                 const last = items[items.length - 1];
@@ -533,7 +525,6 @@
         renderMobileDrawer();
         if (!drawer.querySelector('a[href]')) return;
         openButton.setAttribute('aria-controls', drawer.id);
-        openButton.setAttribute('aria-haspopup', 'dialog');
         header.classList.add('yea-nav-ready');
         setMenuOpen(false);
     });

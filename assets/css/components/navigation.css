@@ -5,6 +5,7 @@
 @media (max-width: 1024px) {
   .yea-mobile-drawer {
     top: 100%;
+    margin: 0;
     height: calc(100vh - var(--yea-header-height, 72px));
     height: calc(100dvh - var(--yea-header-height, 72px));
     max-height: calc(100vh - var(--yea-header-height, 72px));
@@ -12,7 +13,7 @@
     background: var(--card);
     box-shadow: none;
   }
-  .yea-mobile-drawer__inner { gap: 24px; padding-block: 24px; }
+  .yea-mobile-drawer__inner { padding-block: 0 max(24px, env(safe-area-inset-bottom)); }
   .yea-mobile-drawer .yea-mobile-nav-list {
     display: grid !important;
     grid-template-columns: minmax(0, 1fr);
@@ -61,5 +62,4 @@
   .yea-mobile-drawer .wp-block-navigation-item__content .wp-block-navigation-item__label { display: inline; padding: 0; font: inherit; }
   .yea-mobile-drawer .yea-mobile-nav-list a { border-radius: 0; }
   .yea-mobile-drawer .yea-mobile-nav-list { gap: 12px !important; }
-  .yea-mobile-drawer .yea-menu-close { align-self: flex-end; padding: 8px 14px; min-height: 44px; }
 }

@@ -41,7 +41,7 @@ for (const legacy of [false,true]) {
       const trigger=d.querySelector(legacy ? '#menu-toggle' : '.wp-block-navigation__responsive-container-open');
       assert(d.querySelector('#header').classList.contains('yea-nav-ready'));
       trigger.focus();trigger.click();const drawer=d.querySelector('.yea-mobile-drawer');
-      assert.equal(drawer.hidden,false);assert.equal(d.activeElement.className,'yea-menu-close');
+      assert.equal(drawer.hidden,false);assert.equal(d.activeElement,trigger);assert.equal(drawer.querySelector('.yea-menu-close'),null);
       assert.equal(d.querySelector('main').inert,true);
       assert.equal(drawer.querySelectorAll('.wp-block-navigation-submenu__toggle').length,0);
       assert.equal(drawer.querySelectorAll('ul[hidden]').length,0);
@@ -50,7 +50,7 @@ for (const legacy of [false,true]) {
       const childLink=drawer.querySelector('a[href="/afterschool/"]');childLink.focus();
       w.innerWidth=768;w.dispatchEvent(new w.Event('resize'));
       assert.equal(drawer.querySelector('ul ul'),before);assert.equal(d.activeElement,childLink);
-      const closeButton=drawer.querySelector('.yea-menu-close');closeButton.focus();
+      trigger.focus();
       d.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Tab',shiftKey:true,bubbles:true,cancelable:true}));
       assert.equal(d.activeElement,Array.from(drawer.querySelectorAll('a[href]')).at(-1));
       d.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true}));

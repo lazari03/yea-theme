@@ -43,6 +43,21 @@ try { playwright = require('playwright'); } catch {
         return main ? main.getBoundingClientRect().top-header.getBoundingClientRect().bottom : 0;
       });
       assert(gap<=1,`${width}px: unexpected header/main gap ${gap}`);
+      // Page sections must use the canvas; feeds must never force narrow cards.
+      const readableLayout = await page.evaluate(() => {
+        const main = document.querySelector('main.editorial-page--page');
+        const article = main?.querySelector('.editorial-article');
+        const shell = article?.closest('.editorial-shell');
+        const grids = [...document.querySelectorAll('.posts-grid')].map(grid => ({
+          width: grid.getBoundingClientRect().width,
+          cards: [...grid.querySelectorAll(':scope > .wp-block-post')].map(card => card.getBoundingClientRect().width),
+        }));
+        return {article: article?.getBoundingClientRect().width, shell: shell?.getBoundingClientRect().width, grids};
+      });
+      if (readableLayout.article) assert(Math.abs(readableLayout.article-readableLayout.shell)<2, `${width}px: page is squeezed into a sidebar layout`);
+      for (const grid of readableLayout.grids) for (const card of grid.cards) {
+        assert(card >= Math.min(320, grid.width)-2, `${width}px: post card is compressed to ${card}px`);
+      }
       await page.locator('main').evaluate(main=>{
         const fixture=document.createElement('section');fixture.id='component-regressions';fixture.className='container entry-content';
         fixture.innerHTML=`<figure class="wp-block-image"><img id="article-portrait" width="240" height="360" style="width:240px;height:auto" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='360'/%3E" alt="Portrait regression fixture"></figure>

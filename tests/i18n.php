@@ -3,6 +3,7 @@
 define('ABSPATH', '/test/');
 $options=[];$query=['yea_lang'=>'de'];$hooks=[];$root=sys_get_temp_dir().'/yea-i18n-test-'.bin2hex(random_bytes(5));
 function add_action($name,$cb,...$rest){$GLOBALS['hooks'][$name][]=$cb;}function add_filter(...$args){add_action(...$args);}function register_activation_hook(...$args){}function register_deactivation_hook(...$args){}
+function wp_clear_scheduled_hook(...$args){}
 function wp_next_scheduled(...$args){return time()+100;}function wp_schedule_event(...$args){}function wp_schedule_single_event(...$args){}
 function get_option($key,$default=false){return $GLOBALS['options'][$key]??$default;}function update_option($key,$value,...$rest){$GLOBALS['options'][$key]=$value;}function delete_option($key){unset($GLOBALS['options'][$key]);}
 function wp_upload_dir(){return ['basedir'=>$GLOBALS['root']];}function wp_mkdir_p($path){return is_dir($path)||mkdir($path,0777,true);}function wp_json_encode($v,$flags=0){return json_encode($v,$flags);}
@@ -33,32 +34,6 @@ check($xpath->query('//span')->item(0)->textContent==='Hello','Selected filename
 check($xpath->query('//div')->item(0)->textContent==='Hello','Explicit translation exclusion');
 check(str_contains($output,'const label="Hello";'),'Inline JavaScript untouched');
 check(!str_contains($output,'<?xml'),'Temporary encoding declaration removed');
-// Provider batches must validate before persistence; manual entries are not requested again.
-function add_option($key,$value,...$rest){if(isset($GLOBALS['options'][$key]))return false;$GLOBALS['options'][$key]=$value;return true;}
-function sanitize_key($key){return preg_replace('/[^a-z0-9_-]/','',strtolower($key));}
-class WP_Error {public function __construct(public $code,public $message,public $data=[]){}public function get_error_code(){return $this->code;}}
-function is_wp_error($value){return $value instanceof WP_Error;}
-class FakeGooglePrompt {
-    public function __construct(private $prompt){}
-    public function using_provider($provider){check($provider==='google','Existing Google provider selected');return $this;}
-    public function generate_text(){
-        $batch=json_decode(substr($this->prompt,strpos($this->prompt,'Input: ')+7),true);
-        $GLOBALS['requested']=$batch;
-        return $GLOBALS['bad_batch']?'{}':json_encode(array_map(fn($v)=>'Translated '.$v,$batch));
-    }
-}
-function wp_ai_client_prompt($prompt){return new FakeGooglePrompt($prompt);}
-$options['yea_i18n_sources']=[YEA_JSON_Languages::key('Unique {{project}}')=>'Unique {{project}}'];
-$GLOBALS['bad_batch']=true;
-check(is_wp_error(YEA_JSON_Languages::tick()),'Partial/invalid provider output rejected');
-check(!isset($options['yea_i18n_lock']),'Lock released after provider failure');
-check(!is_file($root.'/yea-i18n/sq.json'),'Invalid batch never saved');
-$GLOBALS['bad_batch']=false;
-$result=YEA_JSON_Languages::tick();
-check($result['translated']===1,'Validated provider batch saved');
-check(YEA_JSON_Languages::catalog('sq')[YEA_JSON_Languages::key('Unique {{project}}')]==='Translated Unique {{project}}','Placeholders preserved in saved JSON');
-check(is_file($root.'/yea-i18n/sq.json'),'Translations persist to JSON');
-$options['yea_i18n_lock']=time();
-check(YEA_JSON_Languages::tick()['busy']===true,'Concurrent requests do not call provider twice');
+check(!str_contains(file_get_contents(__DIR__.'/../bundled-plugins/yea-i18n/yea-i18n.php'),'wp_ai_client_prompt'),'Offline mode contains no AI provider calls');
 foreach(glob($root.'/yea-i18n/*') as $file){unlink($file);}rmdir($root.'/yea-i18n');rmdir($root);
-echo "JSON language checks passed.\n";
+echo "Offline JSON language checks passed.\n";

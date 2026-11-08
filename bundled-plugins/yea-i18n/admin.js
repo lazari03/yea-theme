@@ -35,3 +35,51 @@
   }));
   refresh().catch(error => { status.textContent = error.message; });
 })();
+(() => {
+  'use strict';
+  const config = window.yeaLanguageAdmin;
+  const container = document.getElementById('yea-language-editor');
+  const info = document.getElementById('yea-page-info');
+  const state = {page: 1, pages: 1, dirty: false};
+  async function api(path, data) {
+    const response = await fetch(config.url + path, {method: data ? 'POST' : 'GET', headers: {'X-WP-Nonce': config.nonce, 'Content-Type': 'application/json'}, body: data ? JSON.stringify(data) : undefined});
+    const value = await response.json(); if (!response.ok) throw new Error(value.message || 'Request failed'); return value;
+  }
+  async function load(page) {
+    if (state.dirty && !window.confirm('Discard unsaved translations on this page?')) return;
+    const search = document.getElementById('yea-search').value;
+    const result = await api('sources?page=' + page + '&per_page=15&search=' + encodeURIComponent(search));
+    state.page = result.page; state.pages = result.pages; state.dirty = false;
+    container.replaceChildren();
+    result.rows.forEach(row => {
+      const block = document.createElement('fieldset'); block.style.cssText = 'padding:16px;background:white;border:1px solid #ddd;margin-bottom:16px';
+      const source = document.createElement('p'); source.textContent = row.source; source.style.whiteSpace = 'pre-wrap'; block.append(source);
+      ['sq', 'en', 'de'].forEach(language => {
+        const label = document.createElement('label'); label.style.cssText = 'display:block;margin:8px 0'; label.textContent = {sq:'Shqip', en:'English', de:'Deutsch'}[language];
+        const input = document.createElement('textarea'); input.value = row[language]; input.dataset.key = row.key; input.dataset.language = language;
+        input.style.cssText = 'display:block;width:100%;min-height:65px'; input.addEventListener('input', () => { state.dirty = true; });
+        label.append(input); block.append(label);
+      });
+      container.append(block);
+    });
+    info.textContent = 'Page ' + state.page + ' of ' + state.pages + ' · ' + result.total + ' source texts';
+    document.getElementById('yea-prev').disabled = state.page <= 1;
+    document.getElementById('yea-next').disabled = state.page >= state.pages;
+  }
+  const handle = task => task.catch(error => { info.textContent = error.message; });
+  document.getElementById('yea-find').onclick = () => handle(load(1));
+  document.getElementById('yea-prev').onclick = () => handle(load(Math.max(1, state.page - 1)));
+  document.getElementById('yea-next').onclick = () => handle(load(state.page + 1));
+  document.getElementById('yea-save').onclick = async () => {
+    const button = document.getElementById('yea-save'); button.disabled = true;
+    try {
+      for (const language of ['sq', 'en', 'de']) {
+        const entries = {}; container.querySelectorAll('[data-language="' + language + '"]').forEach(input => { entries[input.dataset.key] = input.value; });
+        if (Object.keys(entries).length) await api('catalog', {language, entries});
+      }
+      state.dirty = false; info.textContent = 'Translations saved.';
+    } catch (error) { info.textContent = error.message; } finally { button.disabled = false; }
+  };
+  window.addEventListener('beforeunload', event => { if (state.dirty) { event.preventDefault(); event.returnValue = ''; } });
+  handle(load(1));
+})();

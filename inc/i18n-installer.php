@@ -18,7 +18,7 @@ add_action( 'rest_api_init', function () {
             if ( is_wp_error( $copied ) ) { return $copied; }
             $result = activate_plugin( 'yea-i18n/yea-i18n.php' );
             if ( is_wp_error( $result ) ) { return $result; }
-            return array( 'installed' => true, 'active' => is_plugin_active( 'yea-i18n/yea-i18n.php' ), 'version' => '0.1.0' );
+            return array( 'installed' => true, 'active' => is_plugin_active( 'yea-i18n/yea-i18n.php' ), 'version' => get_plugin_data( $destination . '/yea-i18n.php' )['Version'] );
         },
     ) );
 } );

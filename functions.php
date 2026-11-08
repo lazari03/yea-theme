@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define theme version
-define('YEA_VERSION', '1.3.66');
+define('YEA_VERSION', '1.3.67');
 
 require_once get_template_directory() . '/inc/award-form-config.php';
 require_once get_template_directory() . '/inc/award-delivery.php';
@@ -29,7 +29,7 @@ function yea_theme_setup() {
     add_theme_support('wp-block-styles');
     add_theme_support('align-wide');
     add_theme_support('editor-styles');
-    add_editor_style(array('style.css', 'editor-style.css', 'assets/css/components/partner-logos.css', 'assets/css/components/navigation.css', 'assets/css/components/content.css', 'assets/css/components/forms.css', 'assets/css/components/award-portal.css'));
+    add_editor_style(array('style.css', 'editor-style.css', 'assets/css/components/partner-logos.css', 'assets/css/components/navigation.css', 'assets/css/components/content.css', 'assets/css/components/project-directory.css', 'assets/css/components/forms.css', 'assets/css/components/award-portal.css'));
     add_theme_support('custom-logo', array(
         'height'      => 100,
         'width'       => 300,
@@ -69,7 +69,12 @@ function yea_enqueue_scripts() {
     wp_enqueue_style('yea-partner-logos', get_template_directory_uri() . '/assets/css/components/partner-logos.css', array('yea-style'), YEA_VERSION);
     wp_enqueue_style('yea-navigation', get_template_directory_uri() . '/assets/css/components/navigation.css', array('yea-style'), YEA_VERSION);
 
+    wp_enqueue_style('yea-project-directory', get_template_directory_uri() . '/assets/css/components/project-directory.css', array('yea-style'), YEA_VERSION);
+    if (is_page_template(array('page-project-directory', 'page-project-directory.html'))) {
+        wp_enqueue_script('yea-project-directory', get_template_directory_uri() . '/js/project-directory.js', array(), YEA_VERSION, true);
+    }
     wp_enqueue_style('yea-content', get_template_directory_uri() . '/assets/css/components/content.css', array('yea-style'), YEA_VERSION);
+    wp_enqueue_style('yea-responsive', get_template_directory_uri() . '/assets/css/components/responsive.css', array('yea-navigation'), YEA_VERSION);
     wp_enqueue_style('yea-forms', get_template_directory_uri() . '/assets/css/components/forms.css', array('yea-style'), YEA_VERSION);
 
     if (is_page_template(array('page-award-portal', 'page-award-portal.html'))) {

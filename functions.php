@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define theme version
-define('YEA_VERSION', '1.3.72');
+define('YEA_VERSION', '1.3.73');
 
 require_once get_template_directory() . '/inc/award-form-config.php';
 require_once get_template_directory() . '/inc/award-delivery.php';
@@ -1667,3 +1667,5 @@ function yea_sync_header_navigation_from_primary_menu( $parsed_block ) {
     return $parsed_block;
 }
 add_filter( 'render_block_data', 'yea_sync_header_navigation_from_primary_menu', 20 );
+
+require_once get_template_directory() . '/inc/i18n-installer.php';

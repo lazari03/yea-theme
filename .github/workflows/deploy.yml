@@ -45,7 +45,9 @@ jobs:
         run: npm test
 
       - name: Check Award receipt and delivery authorization
-        run: php tests/award-delivery.php
+        run: |
+          php tests/award-delivery.php
+          php tests/i18n.php
 
       - name: Deploy theme using FTPS
         uses: SamKirkland/FTP-Deploy-Action@v4.4.0

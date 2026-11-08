@@ -2,6 +2,12 @@
 /** Registration receipts and a separate code-authorized delivery portal. */
 if (!defined('ABSPATH')) { exit; }
 
+function yea_award_ui_text($text, $vars = array()) {
+    if (function_exists('yea_i18n_t') && YEA_JSON_Languages::active()) { return yea_i18n_t($text, $vars); }
+    foreach ($vars as $key => $value) { $text = str_replace('{{' . $key . '}}', (string) $value, $text); }
+    return $text;
+}
+
 function yea_award_registration_form_id() { return (int) get_option('yea_award_registration_form_id', 0); }
 function yea_award_delivery_open() { return (bool) get_option('yea_award_delivery_open', false); }
 function yea_award_new_code() { return 'YEA-' . implode('-', str_split(strtoupper(bin2hex(random_bytes(12))), 4)); }
@@ -52,8 +58,8 @@ add_filter('wpcf7_feedback_response', function ($response) {
     $response['project_name'] = $receipt['project'];
     $response['delivery_url'] = yea_award_delivery_url();
     $response['email_confirmation'] = (bool) $email_sent;
-    $response['message'] = 'Regjistrimi u ruajt. Kodi juaj: ' . $receipt['code'] . '. Ruajeni këtë kod për dorëzimin e projektit.';
-    if (!$email_sent) { $response['message'] .= ' Emaili nuk u dërgua; ruajeni kodin nga kjo faqe.'; }
+    $response['message'] = yea_award_ui_text('Regjistrimi u ruajt. Kodi juaj: {{code}}. Ruajeni këtë kod për dorëzimin e projektit.', array('code' => $receipt['code']));
+    if (!$email_sent) { $response['message'] .= ' ' . yea_award_ui_text('Emaili nuk u dërgua; ruajeni kodin nga kjo faqe.'); }
     return $response;
 });
 

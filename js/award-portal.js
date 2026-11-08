@@ -1,6 +1,7 @@
 /* Progressive enhancement only: CF7 owns validation, transport and integrations. */
 (function () {
     'use strict';
+    const translate = (text, vars) => window.yeaI18n ? window.yeaI18n.t(text, vars) : text;
     function init() {
         document.querySelectorAll('.award-portal .wpcf7 form').forEach(function (form) {
             const steps = Array.from(form.querySelectorAll('.award-step'));
@@ -11,7 +12,7 @@
                 input.after(status);
                 input.addEventListener('change', function () {
                     const file = input.files[0];
-                    status.textContent = file ? file.name + ' · ' + (file.size / 1048576).toFixed(1) + ' MB' : '';
+                    status.textContent = file ? file.name + translate(' · ') + (file.size / 1048576).toFixed(1) + ' MB' : '';
                 });
             });
             const progress = document.createElement('ol');
@@ -29,8 +30,8 @@
             });
             form.querySelector('.yea-award-form').prepend(progress);
             const controls = document.createElement('div'); controls.className = 'award-controls';
-            const back = document.createElement('button'); back.type = 'button'; back.className = 'award-back'; back.textContent = 'Kthehu';
-            const next = document.createElement('button'); next.type = 'button'; next.className = 'award-next'; next.textContent = 'Vazhdo →';
+            const back = document.createElement('button'); back.type = 'button'; back.className = 'award-back'; back.textContent = translate('Kthehu');
+            const next = document.createElement('button'); next.type = 'button'; next.className = 'award-next'; next.textContent = translate('Vazhdo →');
             const error = document.createElement('p'); error.className = 'award-step-error'; error.setAttribute('role', 'alert');
             back.addEventListener('click', function () { go(current - 1); });
             next.addEventListener('click', function () { go(current + 1); });
@@ -48,7 +49,7 @@
                 });
                 if (!invalid) return true;
                 show(index, false);
-                error.textContent = 'Plotësoni fushat e detyrueshme dhe kontrolloni të dhënat e shënuara.';
+                error.textContent = translate('Plotësoni fushat e detyrueshme dhe kontrolloni të dhënat e shënuara.');
                 invalid.focus(); return false;
             }
             function show(index, focus) {
@@ -83,7 +84,7 @@
                         const project = panel.querySelector('.award-registered-project');
                         if (project) project.textContent = response.project_name || '';
                         const email = panel.querySelector('.award-email-status');
-                        if (email) email.textContent = response.email_confirmation === false ? 'Emaili nuk u konfirmua. Ruajeni kodin nga kjo faqe.' : 'Kodi ju dërgohet edhe në emailin e koordinatorit.';
+                        if (email) email.textContent = response.email_confirmation === false ? 'Emaili nuk u konfirmua. Ruajeni kodin nga kjo faqe.' : translate('Kodi ju dërgohet edhe në emailin e koordinatorit.');
                         const download = panel.querySelector('.award-save-code');
                         if (download) download.onclick = function () {
                             const blob = new Blob(['YEA! Awards\nProjekti: ' + (response.project_name || '') + '\nKodi: ' + response.registration_code + '\nDorëzimi: ' + (response.delivery_url || '')], {type: 'text/plain;charset=utf-8'});
@@ -103,6 +104,7 @@
 
 (function () {
     'use strict';
+    const translate = (text, vars) => window.yeaI18n ? window.yeaI18n.t(text, vars) : text;
     async function initDelivery() {
         const portal = document.querySelector('.award-delivery');
         if (!portal || !window.yeaAward) return;
@@ -116,50 +118,50 @@
         async function request(path, options) {
             const response = await fetch(root + path, Object.assign({cache: 'no-store', credentials: 'omit'}, options));
             const data = await response.json();
-            if (!response.ok) { const error = new Error(data.message || 'Lidhja nuk u konfirmua. Provoni përsëri.'); error.status = response.status; throw error; }
+            if (!response.ok) { const error = new Error(data.message || translate('Lidhja nuk u konfirmua. Provoni përsëri.')); error.status = response.status; throw error; }
             return data;
         }
         try {
             const result = await request('status');
-            status.textContent = result.open ? 'Dorëzimi është i hapur. Vendosni kodin e regjistrimit.' : 'Dorëzimi i projekteve nuk është hapur ende. Ruajeni kodin tuaj; do ta përdorni këtu kur të hapet.';
+            status.textContent = result.open ? translate('Dorëzimi është i hapur. Vendosni kodin e regjistrimit.') : translate('Dorëzimi i projekteve nuk është hapur ende. Ruajeni kodin tuaj; do ta përdorni këtu kur të hapet.');
             codeForm.hidden = !result.open;
-        } catch (error) { status.textContent = 'Statusi nuk u kontrollua. Rifreskoni faqen për të provuar përsëri.'; }
+        } catch (error) { status.textContent = translate('Statusi nuk u kontrollua. Rifreskoni faqen për të provuar përsëri.'); }
         codeForm.addEventListener('submit', async function (event) {
             event.preventDefault(); errors.textContent = '';
             const button = codeForm.querySelector('button'); button.disabled = true;
             try {
                 const result = await request('unlock', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({code: codeForm.elements.code.value})});
                 token = result.token; codeForm.reset(); codeForm.hidden = true; unlocked.hidden = false;
-                const welcome = portal.querySelector('.award-project-welcome'); welcome.textContent = 'Mirë se vini, “' + result.project + '”.'; welcome.focus();
-                status.textContent = 'Projekti u verifikua. Tani mund të dorëzoni dokumentet.';
+                const welcome = portal.querySelector('.award-project-welcome'); welcome.textContent = translate('Mirë se vini, “{{project}}”.', {project: result.project}); welcome.focus();
+                status.textContent = translate('Projekti u verifikua. Tani mund të dorëzoni dokumentet.');
             } catch (error) { errors.textContent = error.message; }
             finally { button.disabled = false; }
         });
         const documents = fileForm.querySelector('input[type=file]');
         documents.addEventListener('change', function () {
             const list = portal.querySelector('.award-selected-files'); list.replaceChildren();
-            Array.from(documents.files).forEach(function (file) { const li = document.createElement('li'); li.textContent = file.name + ' · ' + (file.size / 1048576).toFixed(1) + ' MB'; list.append(li); });
+            Array.from(documents.files).forEach(function (file) { const li = document.createElement('li'); li.textContent = file.name + translate(' · ') + (file.size / 1048576).toFixed(1) + ' MB'; list.append(li); });
         });
         fileForm.addEventListener('submit', async function (event) {
             event.preventDefault(); errors.textContent = '';
             const files = Array.from(documents.files);
             if (!files.length || files.length > 2 || files.some(function (file) { return !/\.(pptx?|pdf)$/i.test(file.name) || file.size < 1 || file.size > 20 * 1048576; })) {
-                errors.textContent = 'Zgjidhni një ose dy dokumente PDF / PowerPoint, deri në 20 MB secili.'; documents.focus(); return;
+                errors.textContent = translate('Zgjidhni një ose dy dokumente PDF / PowerPoint, deri në 20 MB secili.'); documents.focus(); return;
             }
-            const button = fileForm.querySelector('button'); button.disabled = true; button.textContent = 'Po dërgohen dokumentet…';
+            const button = fileForm.querySelector('button'); button.disabled = true; button.textContent = translate('Po dërgohen dokumentet…');
             try {
                 const result = await request('files', {method: 'POST', headers: {'X-YEA-Delivery-Token': token}, body: new FormData(fileForm)});
-                if (!result.received) throw new Error('Dorëzimi nuk u konfirmua. Provoni përsëri.');
+                if (!result.received) throw new Error(translate('Dorëzimi nuk u konfirmua. Provoni përsëri.'));
                 unlocked.hidden = true; status.textContent = ''; fileForm.reset();
                 const success = portal.querySelector('.award-delivery-success'); success.hidden = false;
-                success.querySelector('.award-delivery-receipt').textContent = 'Referenca e dorëzimit: ' + result.receipt; success.focus();
+                success.querySelector('.award-delivery-receipt').textContent = translate('Referenca e dorëzimit: {{receipt}}', {receipt: result.receipt}); success.focus();
             } catch (error) {
                 errors.textContent = error.message;
                 if (error.status === 401 || error.status === 423) {
                     token = null; unlocked.hidden = true; codeForm.hidden = error.status === 423;
-                    status.textContent = error.status === 423 ? 'Dorëzimi është mbyllur.' : 'Vendosni përsëri kodin për të vazhduar.';
+                    status.textContent = error.status === 423 ? translate('Dorëzimi është mbyllur.') : translate('Vendosni përsëri kodin për të vazhduar.');
                 }
-            } finally { button.disabled = false; button.textContent = 'Dërgo dokumentet'; }
+            } finally { button.disabled = false; button.textContent = translate('Dërgo dokumentet'); }
         });
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initDelivery); else initDelivery();

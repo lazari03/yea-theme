@@ -48,8 +48,6 @@
 .editorial-grid { display: grid; grid-template-columns: minmax(0, 800px) minmax(180px, 260px); gap: clamp(32px, 5vw, 72px); align-items: start; }
 .editorial-article, .editorial-content, .editorial-sidebar { min-width: 0; }
 .editorial-content { font-size: 1.08rem; line-height: 1.85; color: #34414e; }
-.editorial-content :is(p, h1, h2, h3, h4, h5, h6, ul, ol).has-text-align-center,
-.editorial-content > :is(p, h1, h2, h3, h4, h5, h6) { text-align: left !important; }
 .editorial-content > * { margin-block: 0 1.5rem; }
 .editorial-content :is(h2,h3,h4) { color: var(--ink, #18222e); line-height: 1.2; margin-top: 2.5rem; text-wrap: balance; }
 .editorial-content h2 { font-size: clamp(1.65rem, 3vw, 2.4rem); }
@@ -139,3 +137,11 @@
 .site-main .post-card .wp-block-post-featured-image img { position: absolute; inset: 0; width: 100%; height: 100%; }
 .editorial-content .section-head > div { display: grid; gap: 12px; }
 .editorial-content .section-head .yea-component-kicker { justify-self: start; }
+
+/* Center the page composition while respecting each block's saved alignment. */
+.editorial-page--page .editorial-header { text-align: center; }
+.editorial-page--page .editorial-header .wp-block-post-title { margin-inline: auto; text-align: center; }
+.editorial-page--page .editorial-header .yea-breadcrumbs { justify-content: center; text-align: center; }
+.editorial-page--page .editorial-content > :is(p, ul:not(.wp-block-post-template), ol, blockquote) { margin-inline: auto; }
+:where(.editorial-page--page .editorial-content) > :where(h1, h2, h3, h4, h5, h6) { text-align: center; }
+.editorial-page--page .editorial-header .breadcrumb-trail { justify-content: center; }

@@ -26,7 +26,7 @@
       <!-- /wp:group -->
 
       <!-- wp:paragraph -->
-      <p>Use this section on the homepage, About page, donor pages, or landing pages to surface the newest posts automatically.</p>
+      <p>Explore the latest stories, activities, and updates from YEA!.</p>
       <!-- /wp:paragraph -->
     </div>
     <!-- /wp:group -->

@@ -63,3 +63,10 @@
   .yea-mobile-drawer .yea-mobile-nav-list a { border-radius: 0; }
   .yea-mobile-drawer .yea-mobile-nav-list { gap: 12px !important; }
 }
+
+/* Center the mobile menu toggle within the header, independent of logo height. */
+@media (max-width: 1024px) {
+  .site-header .header-inner { display: flex; align-items: center; justify-content: space-between; }
+  .site-header .header-inner > .nav.wp-block-navigation { display: flex; align-items: center; justify-content: flex-end; align-self: center; margin-block: 0; }
+  .site-header .wp-block-navigation__responsive-container-open { align-self: center; margin: 0; display: inline-flex; align-items: center; justify-content: center; }
+}

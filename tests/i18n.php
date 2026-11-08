@@ -33,5 +33,32 @@ check($xpath->query('//span')->item(0)->textContent==='Hello','Selected filename
 check($xpath->query('//div')->item(0)->textContent==='Hello','Explicit translation exclusion');
 check(str_contains($output,'const label="Hello";'),'Inline JavaScript untouched');
 check(!str_contains($output,'<?xml'),'Temporary encoding declaration removed');
-unlink($root.'/yea-i18n/de.json');rmdir($root.'/yea-i18n');rmdir($root);
+// Provider batches must validate before persistence; manual entries are not requested again.
+function add_option($key,$value,...$rest){if(isset($GLOBALS['options'][$key]))return false;$GLOBALS['options'][$key]=$value;return true;}
+function sanitize_key($key){return preg_replace('/[^a-z0-9_-]/','',strtolower($key));}
+class WP_Error {public function __construct(public $code,public $message,public $data=[]){}public function get_error_code(){return $this->code;}}
+function is_wp_error($value){return $value instanceof WP_Error;}
+class FakeGooglePrompt {
+    public function __construct(private $prompt){}
+    public function using_provider($provider){check($provider==='google','Existing Google provider selected');return $this;}
+    public function generate_text(){
+        $batch=json_decode(substr($this->prompt,strpos($this->prompt,'Input: ')+7),true);
+        $GLOBALS['requested']=$batch;
+        return $GLOBALS['bad_batch']?'{}':json_encode(array_map(fn($v)=>'Translated '.$v,$batch));
+    }
+}
+function wp_ai_client_prompt($prompt){return new FakeGooglePrompt($prompt);}
+$options['yea_i18n_sources']=[YEA_JSON_Languages::key('Unique {{project}}')=>'Unique {{project}}'];
+$GLOBALS['bad_batch']=true;
+check(is_wp_error(YEA_JSON_Languages::tick()),'Partial/invalid provider output rejected');
+check(!isset($options['yea_i18n_lock']),'Lock released after provider failure');
+check(!is_file($root.'/yea-i18n/sq.json'),'Invalid batch never saved');
+$GLOBALS['bad_batch']=false;
+$result=YEA_JSON_Languages::tick();
+check($result['translated']===1,'Validated provider batch saved');
+check(YEA_JSON_Languages::catalog('sq')[YEA_JSON_Languages::key('Unique {{project}}')]==='Translated Unique {{project}}','Placeholders preserved in saved JSON');
+check(is_file($root.'/yea-i18n/sq.json'),'Translations persist to JSON');
+$options['yea_i18n_lock']=time();
+check(YEA_JSON_Languages::tick()['busy']===true,'Concurrent requests do not call provider twice');
+foreach(glob($root.'/yea-i18n/*') as $file){unlink($file);}rmdir($root.'/yea-i18n');rmdir($root);
 echo "JSON language checks passed.\n";

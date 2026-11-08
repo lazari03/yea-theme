@@ -19,7 +19,9 @@ jobs:
       - name: Check PHP syntax
         run: find . -type f -name '*.php' -not -path './node_modules/*' -print0 | xargs -0 -r -n1 php -l
       - name: Check Award receipt and delivery authorization
-        run: php tests/award-delivery.php
+        run: |
+          php tests/award-delivery.php
+          php tests/i18n.php
 
       - name: Check JavaScript, CSS, configuration and navigation
         run: npm test

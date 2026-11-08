@@ -18,13 +18,13 @@
         card.hidden = !matches;
         if (matches) count++;
       });
-      directory.querySelector('.directory-count').textContent = count + (count === 1 ? ' project' : ' projects') + ' found';
+      directory.querySelector('.directory-count').textContent = window.yeaI18n ? window.yeaI18n.t(count === 1 ? '{{count}} project found' : '{{count}} projects found', {count: count}) : count + (count === 1 ? ' project' : ' projects') + ' found';
       directory.querySelector('.directory-empty').hidden = count > 0;
     }
     search.addEventListener('input', update);
     buttons.forEach(function (button) {
       button.addEventListener('click', function () {
-        category = button.getAttribute('data-project-filter');
+        category = button.getAttribute('data-project-filter') === 'All' ? 'All' : (button.getAttribute('data-project-filter-label') || button.getAttribute('data-project-filter'));
         buttons.forEach(function (item) { item.setAttribute('aria-pressed', String(item === button)); });
         update();
       });

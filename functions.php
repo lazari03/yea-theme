@@ -1584,3 +1584,81 @@ function yea_handle_reset_site_editor() {
     exit;
 }
 add_action('admin_post_yea_reset_site_editor', 'yea_handle_reset_site_editor');
+
+
+/**
+ * Keep the Gutenberg header navigation in sync with the primary WordPress menu.
+ *
+ * Site Editor can save a separate wp_navigation post that otherwise diverges
+ * from Appearance > Menus. Only the header's "nav" block is synchronized;
+ * footer and other Navigation blocks remain independently editable.
+ */
+function yea_sync_header_navigation_from_primary_menu( $parsed_block ) {
+    if ( ! is_array( $parsed_block ) || ( $parsed_block['blockName'] ?? '' ) !== 'core/navigation' ) {
+        return $parsed_block;
+    }
+
+    $classes = $parsed_block['attrs']['className'] ?? '';
+    if ( ! preg_match( '/(?:^|\s)nav(?:\s|$)/', $classes ) ) {
+        return $parsed_block;
+    }
+
+    $locations = get_nav_menu_locations();
+    $menu_id   = isset( $locations['primary'] ) ? (int) $locations['primary'] : 0;
+    if ( ! $menu_id ) {
+        return $parsed_block;
+    }
+
+    $items = wp_get_nav_menu_items( $menu_id, array( 'post_status' => 'publish' ) );
+    if ( empty( $items ) || is_wp_error( $items ) ) {
+        return $parsed_block;
+    }
+
+    $by_parent = array();
+    foreach ( $items as $item ) {
+        if ( 'publish' !== $item->post_status ) {
+            continue;
+        }
+        $by_parent[ (int) $item->menu_item_parent ][] = $item;
+    }
+
+    // Gutenberg Navigation uses its child blocks for both desktop and mobile.
+    $build = static function ( $parent, $depth = 0 ) use ( &$build, $by_parent ) {
+        if ( $depth > 5 || empty( $by_parent[ $parent ] ) ) {
+            return array();
+        }
+        $result = array();
+        foreach ( $by_parent[ $parent ] as $item ) {
+            $children = $build( (int) $item->ID, $depth + 1 );
+            $label    = html_entity_decode( wp_strip_all_tags( $item->title ), ENT_QUOTES, get_bloginfo( 'charset' ) ?: 'UTF-8' );
+            $url      = esc_url_raw( $item->url );
+            if ( '' === $label || '' === $url ) {
+                continue;
+            }
+            $submenu  = ! empty( $children );
+            $result[] = array(
+                'blockName'    => $submenu ? 'core/navigation-submenu' : 'core/navigation-link',
+                'attrs'        => array(
+                    'label' => $label,
+                    'url'   => $url,
+                ),
+                'innerBlocks'  => $children,
+                'innerHTML'    => '',
+                'innerContent' => array_fill( 0, count( $children ), null ),
+            );
+        }
+        return $result;
+    };
+
+    $children = $build( 0 );
+    if ( ! $children ) {
+        return $parsed_block;
+    }
+
+    unset( $parsed_block['attrs']['ref'] );
+    $parsed_block['innerBlocks']  = $children;
+    $parsed_block['innerHTML']    = '';
+    $parsed_block['innerContent'] = array_fill( 0, count( $children ), null );
+    return $parsed_block;
+}
+add_filter( 'render_block_data', 'yea_sync_header_navigation_from_primary_menu', 20 );

@@ -213,6 +213,13 @@
       "postTypes": [
         "page"
       ]
+    },
+    {
+      "name": "page-project-directory",
+      "title": "YEA Project Directory",
+      "postTypes": [
+        "page"
+      ]
     }
   ]
 }

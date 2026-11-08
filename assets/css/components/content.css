@@ -145,3 +145,6 @@
 .editorial-page--page .editorial-content > :is(p, ul:not(.wp-block-post-template), ol, blockquote) { margin-inline: auto; }
 :where(.editorial-page--page .editorial-content) > :where(h1, h2, h3, h4, h5, h6) { text-align: center; }
 .editorial-page--page .editorial-header .breadcrumb-trail { justify-content: center; }
+/* About-page banner colours: brand title and readable light text on the CTA. */
+.page-id-498 .editorial-header .wp-block-post-title { color: var(--primary-dark); }
+.page-id-498 .editorial-content .cta-band :is(.wp-block-heading, p) { color: #fff; }

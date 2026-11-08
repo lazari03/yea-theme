@@ -6,12 +6,13 @@
   grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--partner-column-min)), 1fr));
   gap: var(--partner-gap);
   align-items: stretch;
+  grid-auto-rows: 1fr;
 }
 .logo-wall-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   min-inline-size: 0;
   gap: 0.375rem;
   padding: clamp(0.375rem, 1vw, 0.75rem);
@@ -73,4 +74,47 @@
 
 @media (max-width: 560px) {
   .logo-wall-grid { --partner-column-min: 10rem; }
+}
+
+/* Equal viewing frames. The original logo files remain editable Image blocks. */
+.logo-wall-card .partner-logo-frame {
+  position: relative;
+  width: 100%;
+  height: clamp(6rem, 28vw, 9rem);
+  flex: 0 0 auto;
+  overflow: hidden;
+  container-type: size;
+  margin: 0;
+}
+.logo-wall-card .partner-logo-frame .wp-block-image,
+.logo-wall-card .partner-logo-frame .wp-block-image a {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+.logo-wall-card:focus-within { outline: 3px solid var(--primary-dark); outline-offset: 3px; }
+/* Bounds compensate for blank margins in the current library assets. Replacing
+   an image uses the normal contain fallback until its bounds are reviewed. */
+@supports (width: 1cqw) {
+  .partner-logo-frame .wp-image-4229 { --logo-width-factor: 2.47933884; --logo-height-factor: 3.06122449; --logo-center-x: 49.83333333%; --logo-center-y: 50.00000000%; }
+  .partner-logo-frame .wp-image-4230 { --logo-width-factor: 1.92307692; --logo-height-factor: 2.77777778; --logo-center-x: 50.00000000%; --logo-center-y: 50.00000000%; }
+  .partner-logo-frame .wp-image-4226 { --logo-width-factor: 2.34375000; --logo-height-factor: 6.81818182; --logo-center-x: 50.00000000%; --logo-center-y: 50.00000000%; }
+  .partner-logo-frame .wp-image-4225 { --logo-width-factor: 1.85185185; --logo-height-factor: 2.75229358; --logo-center-x: 50.00000000%; --logo-center-y: 50.50000000%; }
+  .partner-logo-frame .wp-image-4227 { --logo-width-factor: 1.08695652; --logo-height-factor: 4.91803279; --logo-center-x: 50.00000000%; --logo-center-y: 50.16666667%; }
+  .partner-logo-frame .wp-image-4231 { --logo-width-factor: 1.40515222; --logo-height-factor: 2.55319149; --logo-center-x: 49.91666667%; --logo-center-y: 50.08333333%; }
+  .partner-logo-frame .wp-image-4228 { --logo-width-factor: 2.70270270; --logo-height-factor: 6.25000000; --logo-center-x: 50.16666667%; --logo-center-y: 50.00000000%; }
+  .partner-logo-frame .wp-image-4232 { --logo-width-factor: 1.17187500; --logo-height-factor: 3.19148936; --logo-center-x: 50.00000000%; --logo-center-y: 50.00000000%; }
+  .partner-logo-frame .wp-image-4545 { --logo-width-factor: 1.31455399; --logo-height-factor: 1.33651551; --logo-center-x: 50.00000000%; --logo-center-y: 50.08928571%; }
+  .partner-logo-frame .wp-image-4547 { --logo-width-factor: 1.05766710; --logo-height-factor: 2.73559322; --logo-center-x: 48.01734820%; --logo-center-y: 49.83108108%; }
+  .logo-wall-card .partner-logo-frame img:is(.wp-image-4229,.wp-image-4230,.wp-image-4226,.wp-image-4225,.wp-image-4227,.wp-image-4231,.wp-image-4228,.wp-image-4232,.wp-image-4545,.wp-image-4547) {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: min(calc((100cqw - 24px) * var(--logo-width-factor)), calc((100cqh - 24px) * var(--logo-height-factor))) !important;
+    height: auto !important;
+    max-width: none !important;
+    transform: translate(calc(-1 * var(--logo-center-x)), calc(-1 * var(--logo-center-y)));
+  }
 }
